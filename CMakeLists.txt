@@ -1,31 +1,25 @@
-cmake_minimum_required(VERSION 3.0)
-
-set(CMAKE_TOOLCHAIN_FILE "D:/vcpkg/vcpkg/scripts/buildsystems/vcpkg.cmake")
-
-set(BOOST_POLYGON_INCLUDE_DIRS "D:/vcpkg/vcpkg/installed/x64-windows/include/boost/polygon/")
-
-set(SOURCES 
-    src/main.cpp 
-    ${BOOST_POLYGON_INCLUDE_DIRS}polygon.hpp 
-    include/gtl_poly_serialize.h 
-    include/gtl_poly_types.h
-)
-
-set(data_folder data/)
-set(resource_folder resource/)
-
+cmake_minimum_required(VERSION 3.10)
 
 project(visualization)
 
+set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}scripts/buildsystems/vcpkg.cmake")
+set(BOOST_POLYGON_INCLUDE_DIRS "${VCPKG_ROOT}installed/x64-windows/include/boost/polygon/")
+
+aux_source_directory(src/ sources)
+aux_source_directory(data/ datas)
+aux_source_directory(resource/ resources)
+
 find_package(SFML 2.5 COMPONENTS graphics REQUIRED)
-# find_package(Thor 2 REQUIRED)
 
-file(COPY ${data_folder} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/data) 
-file(COPY ${resource_folder} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resource) 
+file(COPY resource/ DESTINATION resource/) 
 
-add_executable(visualization ${SOURCES})
+foreach(data_file IN ${datas})
+    configure_file(data_file data/ COPYONLY)
+endforeach(data_file)
 
-target_include_directories(visualization PRIVATE ${BOOST_POLYGON_INCLUDE_DIRS} include)
+
+add_executable(visualization ${sources})
+
+target_include_directories(visualization PRIVATE ${BOOST_POLYGON_INCLUDE_DIRS} include/)
 
 target_link_libraries(visualization PRIVATE sfml-graphics)
-# target_link_libraries(visualization PRIVATE ${THOR_LIBRARY})
