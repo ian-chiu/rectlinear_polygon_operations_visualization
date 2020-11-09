@@ -8,8 +8,6 @@
 #include "gtl_poly_types.h"
 using namespace gtl::operators;
 
-using rect_t = std::vector<float>;
-
 int main()
 {
     /// ----------------SETTINGS-----------------
@@ -21,32 +19,10 @@ int main()
         return -1;
     }
 
-    std::vector<rect_t> rects{};
     std::vector<Polygon_Holes> polygons{};
 
-    // read the data from rects.txt
-    std::ifstream rects_file{ "../data/rects.txt" };
-    if (!rects_file) {
-        std::cerr << "Cannot open rects.txt";
-        return -1;
-    }
-    while (rects_file) {
-        std::string strInput;
-        rects_file >> strInput;
-        if (strInput == "RECT") {
-            rect_t rect{};
-            while (rects_file >> strInput)  {
-                if (strInput == ";") {
-                    break;
-                }
-                rect.push_back(stof(strInput));
-            }
-            rects.push_back(rect);
-        }
-    }
-
-    // read polygons (read the data from .txt)
-    std::ifstream input_file{"../data/polygons2.txt"};
+    // read polygons (read the data from polygons.txt)
+    std::ifstream input_file{"../data/polygons3.txt"};
     if (!input_file) {
         std::cerr << "Cannot open file!\n";
         return -1;
@@ -77,10 +53,8 @@ int main()
     PolygonSet ps{};
     ps.push_back(poly1);
     ps.push_back(poly2);
-    // ps += poly1;
-    // ps += poly2;
 
-    /// -----------------DRAWING SECTION-----------------
+    /// -----------------START SFML WINDOW-----------------
     int nScr_w = 800, nScr_h = 600;
     sf::RenderWindow window(sf::VideoMode(nScr_w, nScr_h), "Visualization");
 
@@ -90,11 +64,11 @@ int main()
     {
         sf::Time duration = clock.restart();
         double dElapsedTime = duration.asSeconds();
+
         // check all the window's events that were triggered since the last iteration of the loop
         sf::Event event;
         while (window.pollEvent(event))
         {
-            // "close requested" event: we close the window
             if (event.type == sf::Event::Closed) {
                 window.close();
             }
@@ -127,7 +101,7 @@ int main()
 
         window.clear(sf::Color::Black);
 
-        // lambda function used to transform the position to plotPosition
+        // lambda function used to transform the position to plotting position
         auto plotPos = [nScr_h](float x, float y) {
             return sf::Vector2f(x, nScr_h - y);
         };
@@ -143,31 +117,37 @@ int main()
         text.setString(std::to_string((int)mousePlotPos.x) + ", " + std::to_string((int)mousePlotPos.y));
         window.draw(text);
 
-        // for (const auto &rect : rects) {
-        //     sf::RectangleShape rectShape(sf::Vector2f(rect[2] - rect[0], rect[3] - rect[1]));
-        //     rectShape.setPosition(plotPos(rect[0], rect[3]));
-        //     rectShape.setFillColor(sf::Color::Magenta);
-        //     rectShape.setOutlineColor(sf::Color::White);
-        //     rectShape.setOutlineThickness(-1.f);
-        //     window.draw(rectShape);
-        // }
-
+        // draw polygons
+        sf::ConvexShape convex;
         for (const auto &poly : ps) {
-            sf::ConvexShape convex;
-            convex.setFillColor(sf::Color::Transparent);
+            // draw outline polygon
+            convex.setFillColor(sf::Color::Blue);
             convex.setOutlineColor(sf::Color::White);
             convex.setOutlineThickness(-3.f);
             convex.setPointCount(poly.size());
             int cnt = 0;
-            for (auto vertex : poly) {
+            for (const auto &vertex : poly) {
                 convex.setPoint(cnt, plotPos(vertex.x(), vertex.y()));
                 cnt++;
             }
             window.draw(convex);
+
+            // draw holes inside polygon if there are holes
+            if (!poly.holes_.empty()) {
+                convex.setOutlineColor(sf::Color::Yellow);
+                convex.setFillColor(sf::Color::Black);
+                for (const auto &hole : poly.holes_) {
+                    cnt = 0;
+                    for (const auto &hole_vertex : hole) {
+                        convex.setPoint(cnt, plotPos(hole_vertex.x(), hole_vertex.y()));
+                        cnt++;
+                    }
+                }
+                window.draw(convex);
+            }
         }
 
         window.display();
-
     }
 
     return 0;
