@@ -2,8 +2,10 @@ cmake_minimum_required(VERSION 3.10)
 
 project(visualization)
 
-set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}scripts/buildsystems/vcpkg.cmake")
-set(BOOST_POLYGON_INCLUDE_DIRS "${VCPKG_ROOT}installed/x64-windows/include/boost/polygon/")
+set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
+set(BOOST_POLYGON_INCLUDE_DIRS "${VCPKG_ROOT}/installed/x64-windows/include/boost/polygon/")
+# set(THOR_INCLUDE_DIRS "${VCPKG_ROOT}/installed/x64-windows/include/Thor")
+# set(THOR_LIB "${VCPKG_ROOT}/installed/x64-windows/lib/thor.dll")
 
 aux_source_directory(src/ sources)
 aux_source_directory(data/ datas)
@@ -18,9 +20,13 @@ foreach(data_file IN ${datas})
     configure_file(data_file data/ COPYONLY)
 endforeach(data_file)
 
-
 add_executable(visualization ${sources})
 
-target_include_directories(visualization PRIVATE ${BOOST_POLYGON_INCLUDE_DIRS} include/)
+target_include_directories(visualization 
+    PRIVATE ${BOOST_POLYGON_INCLUDE_DIRS} 
+    PRIVATE include/
+)
 
-target_link_libraries(visualization PRIVATE sfml-graphics)
+target_link_libraries(visualization 
+    PRIVATE sfml-graphics
+)

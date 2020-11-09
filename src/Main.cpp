@@ -9,23 +9,19 @@
 using namespace gtl::operators;
 
 using rect_t = std::vector<float>;
-using poly_t = std::vector<sf::Vector2f>;
 
 int main()
 {
-
     /// ----------------SETTINGS-----------------
     // load fonts
     sf::Font font;
-    if (!font.loadFromFile("D:/CodingWorkplace/school_project/dev/visualization/build/resource/arial.ttf"))
+    if (!font.loadFromFile("../resource/arial.ttf"))
     {
         std::cerr << "Cannot load font!\n";
         return -1;
     }
 
     std::vector<rect_t> rects{};
-    std::vector<poly_t> polys{};
-
     std::vector<Polygon_Holes> polygons{};
 
     // read the data from rects.txt
@@ -49,10 +45,10 @@ int main()
         }
     }
 
-    // read polygons (read the data from input.txt)
-    std::ifstream input_file{"D:/CodingWorkplace/school_project/dev/visualization/build/data/merge.txt"};
+    // read polygons (read the data from .txt)
+    std::ifstream input_file{"../data/polygons2.txt"};
     if (!input_file) {
-        std::cerr << "Cannot open input.txt!\n";
+        std::cerr << "Cannot open file!\n";
         return -1;
     }
 
@@ -75,13 +71,6 @@ int main()
         }
     }
 
-    // for (auto polygon : polygons) {
-    //     for (auto iter = polygon.begin(); iter != polygon.end(); iter++) {
-    //         std::cout << iter->x() << " " << iter->y() << "\n";
-    //     }
-    //     std::cout << "\n";
-    // }
-
     Polygon_Holes poly1 = polygons[0];
     Polygon_Holes poly2 = polygons[1];
 
@@ -93,7 +82,7 @@ int main()
 
     /// -----------------DRAWING SECTION-----------------
     int nScr_w = 800, nScr_h = 600;
-    sf::RenderWindow window(sf::VideoMode(nScr_w, nScr_h), "My window");
+    sf::RenderWindow window(sf::VideoMode(nScr_w, nScr_h), "Visualization");
 
     sf::Clock clock;
     // run the program as long as the window is open
@@ -109,6 +98,7 @@ int main()
             if (event.type == sf::Event::Closed) {
                 window.close();
             }
+
             if (event.type == sf::Event::KeyPressed) {
                 switch (event.key.code) {
                     case sf::Keyboard::M:
@@ -116,6 +106,20 @@ int main()
                         ps.clear();
                         ps += poly1;
                         ps += poly2;
+                        break;
+                    
+                    case sf::Keyboard::C:
+                        std::cout << "C pressed!\n";
+                        ps.clear();
+                        ps.push_back(poly1);
+                        ps -= poly2;
+                        break;
+
+                    case sf::Keyboard::R:
+                        std::cout << "Reset\n";
+                        ps.clear();
+                        ps.push_back(poly1);
+                        ps.push_back(poly2);
                         break;
                 }
             }
@@ -139,32 +143,20 @@ int main()
         text.setString(std::to_string((int)mousePlotPos.x) + ", " + std::to_string((int)mousePlotPos.y));
         window.draw(text);
 
-        for (const auto &rect : rects) {
-            sf::RectangleShape rectShape(sf::Vector2f(rect[2] - rect[0], rect[3] - rect[1]));
-            rectShape.setPosition(plotPos(rect[0], rect[3]));
-            rectShape.setFillColor(sf::Color::Magenta);
-            rectShape.setOutlineColor(sf::Color::White);
-            rectShape.setOutlineThickness(-1.f);
-            window.draw(rectShape);
-        }
-
-        for (const auto &poly : polys) {
-            sf::ConvexShape convex;
-            convex.setFillColor(sf::Color::Transparent);
-            convex.setOutlineColor(sf::Color::White);
-            convex.setOutlineThickness(-2.f);
-            convex.setPointCount(poly.size());
-            for (int i = 0; i < poly.size(); ++i) {
-                convex.setPoint(i, plotPos(poly[i].x, poly[i].y));
-            }
-            window.draw(convex);
-        }
+        // for (const auto &rect : rects) {
+        //     sf::RectangleShape rectShape(sf::Vector2f(rect[2] - rect[0], rect[3] - rect[1]));
+        //     rectShape.setPosition(plotPos(rect[0], rect[3]));
+        //     rectShape.setFillColor(sf::Color::Magenta);
+        //     rectShape.setOutlineColor(sf::Color::White);
+        //     rectShape.setOutlineThickness(-1.f);
+        //     window.draw(rectShape);
+        // }
 
         for (const auto &poly : ps) {
             sf::ConvexShape convex;
             convex.setFillColor(sf::Color::Transparent);
             convex.setOutlineColor(sf::Color::White);
-            convex.setOutlineThickness(-1.f);
+            convex.setOutlineThickness(-3.f);
             convex.setPointCount(poly.size());
             int cnt = 0;
             for (auto vertex : poly) {
@@ -173,7 +165,9 @@ int main()
             }
             window.draw(convex);
         }
+
         window.display();
+
     }
 
     return 0;
