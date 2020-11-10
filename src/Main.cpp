@@ -1,4 +1,5 @@
-#include <SFML\Graphics.hpp>
+#include <SFML/Graphics.hpp>
+#include <Thor/Shapes/ConcaveShape.hpp>
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -22,7 +23,7 @@ int main()
     std::vector<Polygon_Holes> polygons{};
 
     // read polygons (read the data from polygons.txt)
-    std::ifstream input_file{"../data/polygons3.txt"};
+    std::ifstream input_file{"../data/polygons2.txt"};
     if (!input_file) {
         std::cerr << "Cannot open file!\n";
         return -1;
@@ -39,7 +40,7 @@ int main()
             float x{}, y{};
             while (iss >> x) {
                 iss >> y;
-                pts.push_back(gtl::construct<Point>(x, y));
+                pts.push_back(gtl::construct<Point>((int)x, (int)y));
             }
             Polygon_Holes polygon;
             gtl::set_points(polygon, pts.begin(), pts.end());
@@ -106,9 +107,9 @@ int main()
             return sf::Vector2f(x, nScr_h - y);
         };
 
-        // print mouse cursor position
+        // print the mouse cursor position
         sf::Vector2i localPosition = sf::Mouse::getPosition(window);
-        sf::Vector2f mousePlotPos = plotPos(localPosition.x, localPosition.y);
+        sf::Vector2f mousePlotPos = plotPos((float)localPosition.x, (float)localPosition.y);
         sf::Text text;
         text.setFont(font);
         text.setCharacterSize(20);
@@ -118,32 +119,33 @@ int main()
         window.draw(text);
 
         // draw polygons
-        sf::ConvexShape convex;
         for (const auto &poly : ps) {
-            // draw outline polygon
-            convex.setFillColor(sf::Color::Blue);
-            convex.setOutlineColor(sf::Color::White);
-            convex.setOutlineThickness(-3.f);
-            convex.setPointCount(poly.size());
+
+            // draw the outline polygon shape
+            thor::ConcaveShape concave{};
+            concave.setFillColor(sf::Color::Blue);
+            concave.setOutlineColor(sf::Color::White);
+            concave.setOutlineThickness(3.f);
+            concave.setPointCount(poly.size() - 1);
             int cnt = 0;
-            for (const auto &vertex : poly) {
-                convex.setPoint(cnt, plotPos(vertex.x(), vertex.y()));
+            for (auto vertex = poly.begin(); vertex < poly.end() - 1; vertex++) {
+                concave.setPoint(cnt, plotPos((float)vertex->x(), (float)vertex->y()));
                 cnt++;
             }
-            window.draw(convex);
+            window.draw(concave);
 
             // draw holes inside polygon if there are holes
             if (!poly.holes_.empty()) {
-                convex.setOutlineColor(sf::Color::Yellow);
-                convex.setFillColor(sf::Color::Black);
+                concave.setOutlineColor(sf::Color::Yellow);
+                concave.setFillColor(sf::Color::Black);
                 for (const auto &hole : poly.holes_) {
                     cnt = 0;
-                    for (const auto &hole_vertex : hole) {
-                        convex.setPoint(cnt, plotPos(hole_vertex.x(), hole_vertex.y()));
+                    for (auto hole_vertex = hole.begin(); hole_vertex < hole.end() - 1; hole_vertex++) {
+                        concave.setPoint(cnt, plotPos((float)hole_vertex->x(), (float)hole_vertex->y()));
                         cnt++;
                     }
                 }
-                window.draw(convex);
+                window.draw(concave);
             }
         }
 
