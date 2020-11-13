@@ -4,18 +4,18 @@
 #    - Thor 
 #    - Boost.Polygon
 # (Please install dependencies above in vcpkg before building the project)
-# (Hint: You have to add "-DCMAKE_TOOLCHAIN_FILE:<your-path-to-vcpkg.cmake>" when you 
+# (Hint: You have to add "-DCMAKE_TOOLCHAIN_FILE=<your-path-to-vcpkg.cmake>" when you 
 #   configure the project)
 
 cmake_minimum_required(VERSION 3.10)
 
 project(visualization)
 
-set(CMAKE_TOOLCHAIN_FILE "${_VCPKG_ROOT_DIR}/scripts/buildsystems/vcpkg.cmake")
+configure_file(cmake/cmake_variables.h.in "${CMAKE_SOURCE_DIR}/include/cmake_variables.h")
+
 set(BOOST_POLYGON_INCLUDE_DIR "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include/boost/polygon/")
 
 aux_source_directory(src/ SOURCES)
-aux_source_directory(data/ DATAS)
 
 find_package(SFML 2.5 COMPONENTS graphics REQUIRED)
 
@@ -23,13 +23,6 @@ find_package(SFML 2.5 COMPONENTS graphics REQUIRED)
 file(COPY cmake/FindThor.cmake DESTINATION "${_VCPKG_ROOT_DIR}/packages/thor_${VCPKG_TARGET_TRIPLET}/cmake")
 list(APPEND CMAKE_MODULE_PATH "${_VCPKG_ROOT_DIR}/packages/thor_${VCPKG_TARGET_TRIPLET}/cmake")
 find_package(Thor 2.0 REQUIRED)
-
-file(COPY data/ DESTINATION data/)
-file(COPY resource/ DESTINATION resource/) 
-
-foreach(data_file IN ${DATAS})
-    configure_file(data_file data/ COPYONLY)
-endforeach(data_file)
 
 add_executable(visualization ${SOURCES})
 
