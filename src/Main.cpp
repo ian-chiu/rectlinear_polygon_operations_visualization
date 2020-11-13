@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "cmake_variables.h"
 #include "gtl_poly_types.h"
 using namespace gtl::operators;
 
@@ -14,7 +15,7 @@ int main()
     /// ----------------SETTINGS-----------------
     // load fonts
     sf::Font font;
-    if (!font.loadFromFile("../resource/arial.ttf"))
+    if (!font.loadFromFile(CMAKE_SOURCE_DIR + "/resource/arial.ttf"))
     {
         std::cerr << "Cannot load font!\n";
         return -1;
@@ -23,7 +24,7 @@ int main()
     std::vector<Polygon_Holes> polygons{};
 
     // read polygons (read the data from polygons.txt)
-    std::ifstream input_file{"../data/polygons2.txt"};
+    std::ifstream input_file{CMAKE_SOURCE_DIR + "/data/polygons2.txt"};
     if (!input_file) {
         std::cerr << "Cannot open file!\n";
         return -1;
