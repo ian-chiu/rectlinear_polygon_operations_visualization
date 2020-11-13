@@ -8,7 +8,7 @@ namespace gtl = boost::polygon;
 // doing it this way, will prevent holes. The holes are still represented, but
 // by slicing into the poly
 //typedef gtl::polygon_data<int> Polygon;
-typedef gtl::polygon_with_holes_data<int>              Polygon_Holes;
+typedef gtl::polygon_90_with_holes_data<int>           Polygon_Holes;
 typedef gtl::polygon_data<int>                         Polygon_NoHoles;
 typedef gtl::rectangle_data<int>                       Rect;
 typedef gtl::polygon_traits<Polygon_Holes>::point_type Point;

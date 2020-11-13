@@ -24,7 +24,7 @@ int main()
     std::vector<Polygon_Holes> polygons{};
 
     // read polygons (read the data from polygons.txt)
-    std::ifstream input_file{CMAKE_SOURCE_DIR + "/data/polygons2.txt"};
+    std::ifstream input_file{CMAKE_SOURCE_DIR + "/data/polygons3.txt"};
     if (!input_file) {
         std::cerr << "Cannot open file!\n";
         return -1;
@@ -43,6 +43,7 @@ int main()
                 iss >> y;
                 pts.push_back(gtl::construct<Point>((int)x, (int)y));
             }
+            pts.pop_back();
             Polygon_Holes polygon;
             gtl::set_points(polygon, pts.begin(), pts.end());
             polygons.push_back(polygon);
@@ -127,22 +128,23 @@ int main()
             concave.setFillColor(sf::Color::Blue);
             concave.setOutlineColor(sf::Color::White);
             concave.setOutlineThickness(3.f);
-            concave.setPointCount(poly.size() - 1);
+            concave.setPointCount(poly.size());
             int cnt = 0;
-            for (auto vertex = poly.begin(); vertex < poly.end() - 1; vertex++) {
-                concave.setPoint(cnt, plotPos((float)vertex->x(), (float)vertex->y()));
+            for (auto vertex = poly.begin(); vertex != poly.end(); vertex++) {
+                concave.setPoint(cnt, plotPos(gtl::x(*vertex), gtl::y(*vertex)));
                 cnt++;
             }
             window.draw(concave);
 
             // draw holes inside polygon if there are holes
-            if (!poly.holes_.empty()) {
+            if (poly.begin_holes() != poly.end_holes()) {
                 concave.setOutlineColor(sf::Color::Yellow);
                 concave.setFillColor(sf::Color::Black);
-                for (const auto &hole : poly.holes_) {
+                for (auto hole = poly.begin_holes(); hole != poly.end_holes(); hole++) {
+                    concave.setPointCount(hole->size());
                     cnt = 0;
-                    for (auto hole_vertex = hole.begin(); hole_vertex < hole.end() - 1; hole_vertex++) {
-                        concave.setPoint(cnt, plotPos((float)hole_vertex->x(), (float)hole_vertex->y()));
+                    for (auto hole_vertex = hole->begin(); hole_vertex != hole->end(); hole_vertex++) {
+                        concave.setPoint(cnt, plotPos(gtl::x(*hole_vertex), gtl::y(*hole_vertex)));
                         cnt++;
                     }
                 }
