@@ -21,11 +21,10 @@ App::App(sf::RenderWindow &window, int w, int h) :
     hint_text.setPosition(0, 30);
 }
 
-
-void App::render()
+void App::render(const Solution &sol)
 {
     window.clear(sf::Color::Black);
-    split_mode ? draw_rectangles() : draw_polygon_set();
+    split_mode ? draw_rectangles(sol.output_rects) : draw_polygon_set(sol.polygon_set);
     window.draw(hint_text);
     sf::Vector2f mousePlotPos = plotPos(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y);
     mouse_text.setString(std::to_string((int)mousePlotPos.x) + ", " + std::to_string((int)mousePlotPos.y));
@@ -34,14 +33,14 @@ void App::render()
 }
 
 // ----------------private methods------------------
-sf::Vector2f App::plotPos(float x, float y)
+sf::Vector2f App::plotPos(float x, float y) const
 {
     return {x, win_height - y};
 }
 
-void App::draw_rectangles()
+void App::draw_rectangles(const std::vector<Rect> &rects) const
 {
-    for (auto rect : output_rects) {
+    for (auto rect : rects) {
         float rect_width = rect.get(gtl::HORIZONTAL).high() - rect.get(gtl::HORIZONTAL).low();
         float rect_height = rect.get(gtl::VERTICAL).high() - rect.get(gtl::VERTICAL).low();
         sf::RectangleShape rectShape(sf::Vector2f(rect_width, rect_height));
@@ -53,10 +52,10 @@ void App::draw_rectangles()
     }
 }
 
-void App::draw_polygon_set()
+void App::draw_polygon_set(const PolygonSet &ps) const
 {
     // draw polygons
-    for (const auto &poly : polygon_set)
+    for (const auto &poly : ps)
     {
         // draw the outline polygon shape
         thor::ConcaveShape concave{};
