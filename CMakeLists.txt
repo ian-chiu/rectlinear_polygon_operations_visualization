@@ -15,8 +15,6 @@ configure_file(cmake/cmake_variables.h.in "${CMAKE_SOURCE_DIR}/include/cmake_var
 
 set(BOOST_POLYGON_INCLUDE_DIR "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include/boost/polygon/")
 
-aux_source_directory(src/ SOURCES)
-
 find_package(SFML 2.5 COMPONENTS graphics REQUIRED)
 
 # Copy FindThor.cmake to vcpkg, and then find_package() can automatically find thor library for us
@@ -24,7 +22,7 @@ file(COPY cmake/FindThor.cmake DESTINATION "${_VCPKG_ROOT_DIR}/packages/thor_${V
 list(APPEND CMAKE_MODULE_PATH "${_VCPKG_ROOT_DIR}/packages/thor_${VCPKG_TARGET_TRIPLET}/cmake")
 find_package(Thor 2.0 REQUIRED)
 
-add_executable(visualization ${SOURCES})
+add_executable(visualization src/Main.cpp src/App.h src/App.cpp)
 
 target_include_directories(visualization 
     PRIVATE ${BOOST_POLYGON_INCLUDE_DIR} 
