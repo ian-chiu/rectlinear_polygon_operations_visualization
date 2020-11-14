@@ -13,18 +13,18 @@
 class App
 {
 public:
-    App() = delete;
-    App(sf::RenderWindow &window, int &win_width, int &win_height);
+    App() = default;
+    App(sf::RenderWindow &window, int win_width, int win_height);
     void render(const Solution &solution);
 
+    int win_width{};
+    int win_height{};
     sf::Text hint_text;
     sf::Text mouse_text;
     bool split_mode{ false };
 
 private:
     sf::RenderWindow &window;
-    int &win_width;
-    int &win_height;
     sf::Font font;
     inline sf::Vector2f plotPos(float x, float y) const;
     void draw_rectangles(const std::vector<Rect> &rects) const;
