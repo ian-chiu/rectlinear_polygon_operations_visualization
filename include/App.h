@@ -13,7 +13,7 @@
 class App
 {
 public:
-    App() = delete;
+    App() = default;
     App(sf::RenderWindow &window, int &win_width, int &win_height);
     void render(const Solution &solution);
 
