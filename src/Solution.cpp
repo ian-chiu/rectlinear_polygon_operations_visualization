@@ -106,6 +106,8 @@ void Solution::execute_split()
         output_file << "RECT " << gtl::xl(rect) << " " << gtl::yl(rect)
                     << " " << gtl::xh(rect) << " " << gtl::yh(rect) << " ;\n";
     }
+    input_file.close();
+    output_file.close();
 }
 
 std::string Solution::get_split_method()

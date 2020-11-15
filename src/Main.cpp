@@ -18,6 +18,7 @@ int main()
 
         int win_width = 16 * 80, win_height = 9 * 80;
         sf::RenderWindow window(sf::VideoMode(win_width, win_height), "Visualization");
+        
         App app(window, win_width, win_height);
 
         while (window.isOpen())
@@ -53,12 +54,14 @@ int main()
                 {
                     app.hint_text.setString("Press enter to start the operation " + oper);
                     app.render(solution);
-                    continue;
                 }
-
-                solution.execute_operation(oper, app);
-                start_oper = false;
+                else
+                {
+                    solution.execute_operation(oper, app);
+                    start_oper = false;
+                }
             }
+
             if (!isSplit)
             {
                 solution.execute_split();
