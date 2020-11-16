@@ -21,7 +21,7 @@ file(COPY cmake/FindThor.cmake DESTINATION "${_VCPKG_ROOT_DIR}/packages/thor_${V
 list(APPEND CMAKE_MODULE_PATH "${_VCPKG_ROOT_DIR}/packages/thor_${VCPKG_TARGET_TRIPLET}/cmake")
 find_package(Thor 2.0 REQUIRED)
 
-add_executable(visualization include/App.h include/Solution.h src/Main.cpp src/App.cpp src/Solution.cpp)
+add_executable(visualization src/Main.cpp src/App.cpp src/Solution.cpp)
 
 target_include_directories(visualization 
     PRIVATE ${BOOST_POLYGON_INCLUDE_DIR} 

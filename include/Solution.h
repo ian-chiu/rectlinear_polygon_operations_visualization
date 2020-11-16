@@ -35,5 +35,5 @@ private:
     PolygonSet polygon_set{};
     std::string token;
     std::istringstream iss;
-    std::string split_method{ "SO" };
+    std::string split_method{ "SH" };
 };

@@ -30,6 +30,7 @@ int main()
                 std::string oper{operations.front()};
 
                 // let user press enter to start each operation
+                // events control when operations are not done
                 sf::Event event;
                 while (window.pollEvent(event))
                 {
@@ -69,6 +70,7 @@ int main()
             }
 
             // ------------ALL OPERATIONS ARE DONE-----------------
+            // events control when all operations are done 
             sf::Event event;
             while (window.pollEvent(event))
             {

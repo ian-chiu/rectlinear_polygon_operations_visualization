@@ -8,6 +8,7 @@ Solution::Solution(std::string infile, std::string outfile)
     {
         throw std::runtime_error("Cannot open " + infile);
     }
+    output_rects.reserve(10000);
 }
 
 Solution::~Solution()
@@ -68,7 +69,7 @@ void Solution::execute_operation(std::string oper, App &app)
                     while (iss >> x)
                     {
                         iss >> y;
-                        pts.emplace_back(gtl::construct<Point>(x, y));
+                        pts.push_back(gtl::construct<Point>(x, y));
                     }
                     pts.pop_back();
                     gtl::set_points(polygon, pts.begin(), pts.end());
