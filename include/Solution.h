@@ -9,6 +9,8 @@
 #include <stdexcept>
 #include <string>
 #include <deque>
+#include <future>
+#include <vector>
 #include "App.h"
 #include "gtl_poly_types.h"
 
@@ -36,4 +38,8 @@ private:
     std::string token;
     std::istringstream iss;
     std::string split_method{ "SH" };
+
+    std::vector<std::future<void>> futures;
+    static void mergePolygon(PolygonSet &ps, Polygon_Holes polygon);
+    void wait_futures();
 };
