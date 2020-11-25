@@ -40,6 +40,7 @@ std::deque<std::string> Solution::copy_operations()
 
 void Solution::execute_operation(std::string oper, App &app)
 {
+
     std::string token;
     std::istringstream iss;
     input_file.clear();
@@ -77,17 +78,35 @@ void Solution::execute_operation(std::string oper, App &app)
                     pts.pop_back();
                     gtl::set_points(polygon, pts.begin(), pts.end());
 
-                    if (polygon_set.empty())
+                    // render polygon set
+                    polygon_set.push_back(polygon);
+                    bool can_start_step = false;
+                    while(!can_start_step) 
                     {
-                        polygon_set.push_back(polygon);
+                        sf::Event event;
+                        while (app.window.pollEvent(event))
+                        {
+                            if (event.type == sf::Event::Closed)
+                            {
+                                app.window.close();
+                            }
+                            else if (event.type == sf::Event::KeyPressed)
+                            {
+                                switch (event.key.code)
+                                {
+                                case sf::Keyboard::Enter:
+                                    can_start_step = true;
+                                    polygon_set.pop_back();
+                                    break;
+                                }
+                            }
+                        }
+                        app.render(*this);
                     }
-                    else
-                    {
-                        if (oper[0] == 'M') 
-                            polygon_set += polygon;
-                        if (oper[0] == 'C')
-                            polygon_set -= polygon;
-                    }
+                    if (oper[0] == 'M') 
+                        polygon_set += polygon;
+                    if (oper[0] == 'C')
+                        polygon_set -= polygon;
                     app.render(*this);
                 }
             }

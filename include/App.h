@@ -12,6 +12,8 @@
 
 class App
 {
+    friend Solution;
+
 public:
     App(int win_width = 1280, int win_height = 720);
     void render(const Solution &solution);
@@ -25,7 +27,7 @@ private:
     int win_width;
     int win_height;
     sf::Font font;
-    std::deque<std::string> operations_queue;
+    bool hidden_shapes;
     inline sf::Vector2f plotPos(float x, float y);
     void draw_rectangles(const std::vector<Rect> &rects);
     void draw_polygon_set(const PolygonSet &ps);
