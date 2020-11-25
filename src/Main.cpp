@@ -15,28 +15,25 @@ int main()
         Solution solution(CMAKE_SOURCE_DIR + "/data/input.txt", CMAKE_SOURCE_DIR + "/data/output.txt");
         solution.read_operations();
         std::deque<std::string> operations = solution.copy_operations();
-
-        int win_width = 16 * 80, win_height = 9 * 80;
-        sf::RenderWindow window(sf::VideoMode(win_width, win_height), "Visualization");
         
-        App app(window, win_width, win_height);
+        App app{};
 
-        while (window.isOpen())
+        while (app.window.isOpen())
         {
             // ----------------START EACH OPERATION----------------
             bool start_oper{ false };
-            while (!operations.empty() && window.isOpen())
+            while (!operations.empty() && app.window.isOpen())
             {
                 std::string oper{operations.front()};
 
                 // let user press enter to start each operation
                 // events control when operations are not done
                 sf::Event event;
-                while (window.pollEvent(event))
+                while (app.window.pollEvent(event))
                 {
                     if (event.type == sf::Event::Closed)
                     {
-                        window.close();
+                        app.window.close();
                     }
                     else if (event.type == sf::Event::KeyPressed)
                     {
@@ -72,11 +69,11 @@ int main()
             // ------------ALL OPERATIONS ARE DONE-----------------
             // events control when all operations are done 
             sf::Event event;
-            while (window.pollEvent(event))
+            while (app.window.pollEvent(event))
             {
                 if (event.type == sf::Event::Closed)
                 {
-                    window.close();
+                    app.window.close();
                 }
                 else if (event.type == sf::Event::KeyPressed) 
                 {

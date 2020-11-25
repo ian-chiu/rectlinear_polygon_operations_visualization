@@ -19,6 +19,7 @@ Solution::~Solution()
 
 void Solution::read_operations()
 {
+    std::string token;
     input_file >> token;
     if (token != "OPERATION")
     {
@@ -39,6 +40,8 @@ std::deque<std::string> Solution::copy_operations()
 
 void Solution::execute_operation(std::string oper, App &app)
 {
+    std::string token;
+    std::istringstream iss;
     input_file.clear();
     input_file.seekg(0, input_file.beg);
     std::string line;
@@ -80,19 +83,17 @@ void Solution::execute_operation(std::string oper, App &app)
                     }
                     else
                     {
-                        if (oper[0] == 'M') {
-                            futures.push_back(std::async(std::launch::async, mergePolygon, this->polygon_set, polygon));
-                        }
+                        if (oper[0] == 'M') 
+                            polygon_set += polygon;
                         if (oper[0] == 'C')
                             polygon_set -= polygon;
                     }
-                    // app.render(*this);
+                    app.render(*this);
                 }
             }
             break;
         }
     }
-    wait_futures();
 }
 
 void Solution::execute_split()
@@ -116,18 +117,4 @@ void Solution::execute_split()
 std::string Solution::get_split_method()
 {
     return split_method;
-}
-
-static std::mutex polygonSetMutex;
-void Solution::mergePolygon(PolygonSet &ps, Polygon_Holes polygon)
-{
-    std::lock_guard<std::mutex> lock(polygonSetMutex);
-    ps += polygon;
-}
-
-void Solution::wait_futures()
-{
-    for (const auto &future : futures) {
-        future.wait();
-    }
 }

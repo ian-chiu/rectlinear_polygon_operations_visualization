@@ -3,13 +3,15 @@
 #include <stdexcept>
 
 // contructor
-App::App(sf::RenderWindow &window, int &w, int &h)
-   : window(window), win_width(w), win_height(h)
+App::App(int w, int h)
+   : win_width(w), win_height(h)
 {
     if (!font.loadFromFile(CMAKE_SOURCE_DIR + "/resource/arial.ttf"))
     {
         throw std::runtime_error("Cannot load font!");
     }
+
+    window.create(sf::VideoMode(win_width, win_height), "Visualization");
 
     mouse_text.setFont(font);
     mouse_text.setCharacterSize(20);
@@ -32,14 +34,13 @@ void App::render(const Solution &sol)
     window.display();
 }
 
-
 // ----------------private methods------------------
-sf::Vector2f App::plotPos(float x, float y) const
+sf::Vector2f App::plotPos(float x, float y)
 {
     return {x, win_height - y};
 }
 
-void App::draw_rectangles(const std::vector<Rect> &rects) const
+void App::draw_rectangles(const std::vector<Rect> &rects)
 {
     for (auto rect : rects) {
         float rect_width = rect.get(gtl::HORIZONTAL).high() - rect.get(gtl::HORIZONTAL).low();
@@ -53,7 +54,7 @@ void App::draw_rectangles(const std::vector<Rect> &rects) const
     }
 }
 
-void App::draw_polygon_set(const PolygonSet &ps) const
+void App::draw_polygon_set(const PolygonSet &ps)
 {
     // draw polygons
     for (const auto &poly : ps)

@@ -13,20 +13,20 @@
 class App
 {
 public:
-    App() = default;
-    App(sf::RenderWindow &window, int &win_width, int &win_height);
+    App(int win_width = 1280, int win_height = 720);
     void render(const Solution &solution);
 
+    sf::RenderWindow window;
     sf::Text hint_text;
     sf::Text mouse_text;
     bool split_mode{ false };
 
 private:
-    sf::RenderWindow &window;
-    int &win_width;
-    int &win_height;
+    int win_width;
+    int win_height;
     sf::Font font;
-    inline sf::Vector2f plotPos(float x, float y) const;
-    void draw_rectangles(const std::vector<Rect> &rects) const;
-    void draw_polygon_set(const PolygonSet &ps) const;
+    std::deque<std::string> operations_queue;
+    inline sf::Vector2f plotPos(float x, float y);
+    void draw_rectangles(const std::vector<Rect> &rects);
+    void draw_polygon_set(const PolygonSet &ps);
 };

@@ -12,6 +12,7 @@
 #include <future>
 #include <vector>
 #include "App.h"
+#include "PolygonSetHelper.h"
 #include "gtl_poly_types.h"
 
 class Solution
@@ -19,7 +20,7 @@ class Solution
     friend class App;
 
 public:
-    Solution() = delete;
+    Solution() = default;
     Solution(std::string infile, std::string outfile);
     ~Solution();
 
@@ -35,11 +36,5 @@ private:
     std::deque<std::string> operations{};
     std::vector<Rect> output_rects{};
     PolygonSet polygon_set{};
-    std::string token;
-    std::istringstream iss;
     std::string split_method{ "SH" };
-
-    std::vector<std::future<void>> futures;
-    static void mergePolygon(PolygonSet &ps, Polygon_Holes polygon);
-    void wait_futures();
 };
