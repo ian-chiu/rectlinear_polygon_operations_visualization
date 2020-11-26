@@ -21,7 +21,7 @@ int main()
         while (app.window.isOpen())
         {
             // ----------------START EACH OPERATION----------------
-            bool start_oper{ false };
+            bool can_start_oper{ false };
             while (!operations.empty() && app.window.isOpen())
             {
                 std::string oper{operations.front()};
@@ -41,14 +41,14 @@ int main()
                         {
                         case sf::Keyboard::Enter:
                             app.hint_text.setString(oper + " processing...");
-                            start_oper = true;
+                            can_start_oper = true;
                             operations.pop_front();
                             break;
                         }
                     }
                 }
 
-                if (start_oper == false)
+                if (!can_start_oper)
                 {
                     app.hint_text.setString("Press enter to start the operation " + oper);
                     app.render(solution);
@@ -56,7 +56,7 @@ int main()
                 else
                 {
                     solution.execute_operation(oper, app);
-                    start_oper = false;
+                    can_start_oper = false;
                 }
             }
 

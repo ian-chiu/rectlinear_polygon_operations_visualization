@@ -81,6 +81,9 @@ void Solution::execute_operation(std::string oper, App &app)
                     // render polygon set
                     polygon_set.push_back(polygon);
                     bool can_start_step = false;
+                    std::string message = (oper[0] == 'M') ? "MERGE " : "CLIP ";
+                    message += line + "\n(Press enter to execute)";
+                    app.hint_text.setString(message);
                     while(!can_start_step) 
                     {
                         sf::Event event;
@@ -96,6 +99,7 @@ void Solution::execute_operation(std::string oper, App &app)
                                 {
                                 case sf::Keyboard::Enter:
                                     can_start_step = true;
+                                    app.hint_text.setString(oper + "processing...");
                                     polygon_set.pop_back();
                                     break;
                                 }
