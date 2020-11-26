@@ -98,6 +98,7 @@ void Solution::execute_and_render_operation(std::string oper, App &app)
                             sf::Event event;
                             while (app.window.pollEvent(event))
                             {
+                                ImGui::SFML::ProcessEvent(event);
                                 if (event.type == sf::Event::Closed)
                                 {
                                     app.window.close();

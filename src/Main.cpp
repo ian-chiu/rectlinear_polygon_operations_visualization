@@ -31,6 +31,7 @@ int main()
                 sf::Event event;
                 while (app.window.pollEvent(event))
                 {
+                    ImGui::SFML::ProcessEvent(event);
                     if (event.type == sf::Event::Closed)
                     {
                         app.window.close();
@@ -82,6 +83,7 @@ int main()
             sf::Event event;
             while (app.window.pollEvent(event))
             {
+                ImGui::SFML::ProcessEvent(event);
                 if (event.type == sf::Event::Closed)
                 {
                     app.window.close();
@@ -122,5 +124,5 @@ int main()
         return -1;
     }
 
-    return 0;
+    ImGui::SFML::Shutdown();
 }

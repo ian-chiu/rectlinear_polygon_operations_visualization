@@ -23,6 +23,9 @@ file(COPY cmake/FindThor.cmake DESTINATION "${_VCPKG_ROOT_DIR}/packages/thor_${V
 list(APPEND CMAKE_MODULE_PATH "${_VCPKG_ROOT_DIR}/packages/thor_${VCPKG_TARGET_TRIPLET}/cmake")
 find_package(Thor 2.0 REQUIRED)
 
+find_package(imgui CONFIG REQUIRED)
+find_package(ImGui-SFML CONFIG REQUIRED)
+
 add_executable(visualization ${SOURCES})
 
 target_include_directories(visualization 
@@ -33,6 +36,7 @@ target_include_directories(visualization
 target_link_libraries(visualization 
     PRIVATE sfml-graphics
     PRIVATE ${THOR_LIBRARY}
+    PRIVATE ImGui-SFML::ImGui-SFML
 )
 
 
