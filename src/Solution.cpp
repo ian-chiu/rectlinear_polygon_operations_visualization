@@ -38,7 +38,7 @@ std::deque<std::string> Solution::copy_operations()
     return operations;
 }
 
-void Solution::execute_operation(std::string oper, App &app)
+void Solution::execute_and_render_operation(std::string oper, App &app)
 {
 
     std::string token;
@@ -78,40 +78,45 @@ void Solution::execute_operation(std::string oper, App &app)
                     pts.pop_back();
                     gtl::set_points(polygon, pts.begin(), pts.end());
 
-                    // render polygon set
-                    polygon_set.push_back(polygon);
-                    bool can_start_step = false;
-                    std::string message = (oper[0] == 'M') ? "MERGE " : "CLIP ";
-                    message += line + "\n(Press enter to execute)";
-                    app.hint_text.setString(message);
-                    while(!can_start_step) 
+                    // ---------render and execute operation on polygon set----------
+                    if (app.is_step_by_step)
                     {
-                        sf::Event event;
-                        while (app.window.pollEvent(event))
+                        polygon_set.push_back(polygon);
+                        bool can_start_step = false;
+                        std::string message = oper + " current Task (Press enter to execute):\n\t";
+                        message += (oper[0] == 'M') ? "MERGE " : "CLIP ";
+                        message += line;
+                        app.hint_text.setString(message);
+                        while(!can_start_step) 
                         {
-                            if (event.type == sf::Event::Closed)
+                            sf::Event event;
+                            while (app.window.pollEvent(event))
                             {
-                                app.window.close();
-                            }
-                            else if (event.type == sf::Event::KeyPressed)
-                            {
-                                switch (event.key.code)
+                                if (event.type == sf::Event::Closed)
                                 {
-                                case sf::Keyboard::Enter:
-                                    can_start_step = true;
-                                    app.hint_text.setString(oper + "processing...");
-                                    polygon_set.pop_back();
-                                    break;
+                                    app.window.close();
+                                }
+                                else if (event.type == sf::Event::KeyPressed)
+                                {
+                                    switch (event.key.code)
+                                    {
+                                    case sf::Keyboard::Enter:
+                                        can_start_step = true;
+                                        app.hint_text.setString(oper + "processing...");
+                                        polygon_set.pop_back();
+                                        break;
+                                    }
                                 }
                             }
+                            app.render(*this);
                         }
-                        app.render(*this);
                     }
+                    
                     if (oper[0] == 'M') 
                         polygon_set += polygon;
                     if (oper[0] == 'C')
                         polygon_set -= polygon;
-                    app.render(*this);
+                    app.render(*this, false);
                 }
             }
             break;

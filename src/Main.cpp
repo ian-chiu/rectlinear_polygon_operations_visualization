@@ -39,9 +39,17 @@ int main()
                     {
                         switch (event.key.code)
                         {
+                        case sf::Keyboard::Space:
+                            app.hint_text.setString(oper + " processing...");
+                            can_start_oper = true;
+                            app.is_step_by_step = false;
+                            operations.pop_front();
+                            break;
+
                         case sf::Keyboard::Enter:
                             app.hint_text.setString(oper + " processing...");
                             can_start_oper = true;
+                            app.is_step_by_step = true;
                             operations.pop_front();
                             break;
                         }
@@ -50,12 +58,15 @@ int main()
 
                 if (!can_start_oper)
                 {
-                    app.hint_text.setString("Press enter to start the operation " + oper);
+                    std::string message{ "Operation " + oper };
+                    message += "\n\t(1) Press Spacebar to execute the whole operation\n";
+                    message += "\t(2) Press Enter to execute step by step";
+                    app.hint_text.setString(message);
                     app.render(solution);
                 }
                 else
                 {
-                    solution.execute_operation(oper, app);
+                    solution.execute_and_render_operation(oper, app);
                     can_start_oper = false;
                 }
             }
@@ -95,14 +106,14 @@ int main()
             {
                 message += "Press \"esc\" to change to non-split version...";
                 app.hint_text.setString(message);
-                app.render(solution);
             }
             else
             {
                 message += "Press \"s\" to change to split mode("+ solution.get_split_method() +")...";
                 app.hint_text.setString(message);
-                app.render(solution);
             }
+            
+            app.render(solution);
         }
     }
     catch(const std::exception& e)

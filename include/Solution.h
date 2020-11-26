@@ -25,7 +25,7 @@ public:
     ~Solution();
 
     void read_operations();
-    void execute_operation(std::string oper, App &app);
+    void execute_and_render_operation(std::string oper, App &app);
     void execute_split();
     std::deque<std::string> copy_operations();
     std::string get_split_method();
