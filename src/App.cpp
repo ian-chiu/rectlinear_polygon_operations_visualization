@@ -3,13 +3,15 @@
 #include <stdexcept>
 
 // contructor
-App::App(sf::RenderWindow &window, int &w, int &h)
-   : window(window), win_width(w), win_height(h)
+App::App(int w, int h)
+   : win_width(w), win_height(h)
 {
     if (!font.loadFromFile(CMAKE_SOURCE_DIR + "/resource/arial.ttf"))
     {
         throw std::runtime_error("Cannot load font!");
     }
+
+    window.create(sf::VideoMode(win_width, win_height), "Visualization");
 
     mouse_text.setFont(font);
     mouse_text.setCharacterSize(20);
@@ -21,10 +23,12 @@ App::App(sf::RenderWindow &window, int &w, int &h)
     hint_text.setPosition(0, 30);
 }
 
-void App::render(const Solution &sol)
+void App::render(const Solution &sol, bool can_draw_shapes)
 {
     window.clear(sf::Color::Black);
-    split_mode ? draw_rectangles(sol.output_rects) : draw_polygon_set(sol.polygon_set);
+    if (can_draw_shapes)
+        split_mode ? draw_rectangles(sol.output_rects) : draw_polygon_set(sol.polygon_set);
+
     window.draw(hint_text);
     sf::Vector2f mousePlotPos = plotPos(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y);
     mouse_text.setString(std::to_string((int)mousePlotPos.x) + ", " + std::to_string((int)mousePlotPos.y));
@@ -32,37 +36,36 @@ void App::render(const Solution &sol)
     window.display();
 }
 
-
 // ----------------private methods------------------
-sf::Vector2f App::plotPos(float x, float y) const
+sf::Vector2f App::plotPos(float x, float y)
 {
     return {x, win_height - y};
 }
 
-void App::draw_rectangles(const std::vector<Rect> &rects) const
+void App::draw_rectangles(const std::vector<Rect> &rects)
 {
     for (auto rect : rects) {
         float rect_width = rect.get(gtl::HORIZONTAL).high() - rect.get(gtl::HORIZONTAL).low();
         float rect_height = rect.get(gtl::VERTICAL).high() - rect.get(gtl::VERTICAL).low();
         sf::RectangleShape rectShape(sf::Vector2f(rect_width, rect_height));
         rectShape.setPosition(plotPos(gtl::xl(rect), gtl::yh(rect)));
-        rectShape.setFillColor(sf::Color::Blue);
+        rectShape.setFillColor(color_board);
         rectShape.setOutlineColor(sf::Color::White);
         rectShape.setOutlineThickness(-1.f);
         window.draw(rectShape);
     }
 }
 
-void App::draw_polygon_set(const PolygonSet &ps) const
+void App::draw_polygon_set(const PolygonSet &ps)
 {
     // draw polygons
     for (const auto &poly : ps)
     {
         // draw the outline polygon shape
         thor::ConcaveShape concave{};
-        concave.setFillColor(sf::Color::Blue);
+        concave.setFillColor(color_board);
         concave.setOutlineColor(sf::Color::White);
-        concave.setOutlineThickness(3.f);
+        concave.setOutlineThickness(2.f);
         concave.setPointCount(poly.size());
         int cnt = 0;
         for (auto vertex = poly.begin(); vertex != poly.end(); vertex++)

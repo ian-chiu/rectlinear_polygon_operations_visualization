@@ -15,51 +15,59 @@ int main()
         Solution solution(CMAKE_SOURCE_DIR + "/data/input.txt", CMAKE_SOURCE_DIR + "/data/output.txt");
         solution.read_operations();
         std::deque<std::string> operations = solution.copy_operations();
-
-        int win_width = 16 * 80, win_height = 9 * 80;
-        sf::RenderWindow window(sf::VideoMode(win_width, win_height), "Visualization");
         
-        App app(window, win_width, win_height);
+        App app{};
 
-        while (window.isOpen())
+        while (app.window.isOpen())
         {
             // ----------------START EACH OPERATION----------------
-            bool start_oper{ false };
-            while (!operations.empty() && window.isOpen())
+            bool can_start_oper{ false };
+            while (!operations.empty() && app.window.isOpen())
             {
                 std::string oper{operations.front()};
 
                 // let user press enter to start each operation
                 // events control when operations are not done
                 sf::Event event;
-                while (window.pollEvent(event))
+                while (app.window.pollEvent(event))
                 {
                     if (event.type == sf::Event::Closed)
                     {
-                        window.close();
+                        app.window.close();
                     }
                     else if (event.type == sf::Event::KeyPressed)
                     {
                         switch (event.key.code)
                         {
+                        case sf::Keyboard::Space:
+                            app.hint_text.setString(oper + " processing...");
+                            can_start_oper = true;
+                            app.is_step_by_step = false;
+                            operations.pop_front();
+                            break;
+
                         case sf::Keyboard::Enter:
                             app.hint_text.setString(oper + " processing...");
-                            start_oper = true;
+                            can_start_oper = true;
+                            app.is_step_by_step = true;
                             operations.pop_front();
                             break;
                         }
                     }
                 }
 
-                if (start_oper == false)
+                if (!can_start_oper)
                 {
-                    app.hint_text.setString("Press enter to start the operation " + oper);
+                    std::string message{ "Operation " + oper };
+                    message += "\n\t(1) Press Spacebar to execute the whole operation\n";
+                    message += "\t(2) Press Enter to execute step by step";
+                    app.hint_text.setString(message);
                     app.render(solution);
                 }
                 else
                 {
-                    solution.execute_operation(oper, app);
-                    start_oper = false;
+                    solution.execute_and_render_operation(oper, app);
+                    can_start_oper = false;
                 }
             }
 
@@ -72,11 +80,11 @@ int main()
             // ------------ALL OPERATIONS ARE DONE-----------------
             // events control when all operations are done 
             sf::Event event;
-            while (window.pollEvent(event))
+            while (app.window.pollEvent(event))
             {
                 if (event.type == sf::Event::Closed)
                 {
-                    window.close();
+                    app.window.close();
                 }
                 else if (event.type == sf::Event::KeyPressed) 
                 {
@@ -98,14 +106,14 @@ int main()
             {
                 message += "Press \"esc\" to change to non-split version...";
                 app.hint_text.setString(message);
-                app.render(solution);
             }
             else
             {
                 message += "Press \"s\" to change to split mode("+ solution.get_split_method() +")...";
                 app.hint_text.setString(message);
-                app.render(solution);
             }
+            
+            app.render(solution);
         }
     }
     catch(const std::exception& e)
