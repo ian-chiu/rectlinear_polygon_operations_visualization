@@ -1,8 +1,9 @@
 #include "Solution.h"
+#include <limits>
 using namespace gtl::operators;
 
 Solution::Solution(std::string infile, std::string outfile) 
-    : input_file(infile), output_file(outfile) 
+    : input_file(infile), output_file(outfile), input_file_path(infile)
 {
     if (!input_file)
     {
@@ -46,8 +47,10 @@ void Solution::execute_and_render_operation(std::string oper, App &app)
     input_file.clear();
     input_file.seekg(0, input_file.beg);
     std::string line;
+    int line_cnt = 0;
     while (getline(input_file, line))
     {
+        line_cnt++;
         if (line[0] != 'D')
         {
             continue;
@@ -56,6 +59,7 @@ void Solution::execute_and_render_operation(std::string oper, App &app)
         {
             while (getline(input_file, line))
             {
+                line_cnt++;
                 iss.clear();
                 iss.str(line);
                 iss >> token;
@@ -81,11 +85,13 @@ void Solution::execute_and_render_operation(std::string oper, App &app)
                     // ---------render and execute operation on polygon set----------
                     if (app.is_step_by_step)
                     {
+                        int nRemains = find_remain_polygons(line_cnt);
                         polygon_set.push_back(polygon);
                         bool can_start_step = false;
                         std::string message = oper + " current Task (Press enter to execute):\n\t";
                         message += (oper[0] == 'M') ? "MERGE " : "CLIP ";
                         message += line;
+                        message += "\n(remain " + std::to_string(nRemains) + " polygons that need to operate...)";
                         app.hint_text.setString(message);
                         while(!can_start_step) 
                         {
@@ -145,4 +151,23 @@ void Solution::execute_split()
 std::string Solution::get_split_method()
 {
     return split_method;
+}
+
+int Solution::find_remain_polygons(int line_cnt)
+{
+    std::ifstream ifile{ input_file_path };
+    for (int i = 0; i < line_cnt; i++) 
+        ifile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+    std::string line;
+    int polygon_cnt = 0;
+    while (getline(ifile, line)) 
+    {
+        polygon_cnt++;
+        if (line[0] == 'E')
+            break;
+    }
+
+    ifile.close();
+    return polygon_cnt;
 }
