@@ -88,11 +88,11 @@ void Solution::execute_and_render_operation(std::string oper, App &app)
                         int nRemains = find_remain_polygons(line_cnt);
                         polygon_set.push_back(polygon);
                         bool can_start_step = false;
-                        std::string message = oper + " current Task (Press enter to execute):\n\t";
+                        std::string message = oper + " current Task:\n\t";
                         message += (oper[0] == 'M') ? "MERGE " : "CLIP ";
                         message += line;
-                        message += "\n(remain " + std::to_string(nRemains) + " polygons that need to operate...)";
-                        app.hint_text.setString(message);
+                        message += "\n\t(remain " + std::to_string(nRemains) + " polygons that need to operate...)";
+                        app.hint_text = message;
                         while(!can_start_step) 
                         {
                             sf::Event event;
@@ -109,7 +109,14 @@ void Solution::execute_and_render_operation(std::string oper, App &app)
                                     {
                                     case sf::Keyboard::Enter:
                                         can_start_step = true;
-                                        app.hint_text.setString(oper + "processing...");
+                                        app.hint_text = oper + "processing...";
+                                        polygon_set.pop_back();
+                                        break;
+
+                                    case sf::Keyboard::Space:
+                                        can_start_step = true;
+                                        app.is_step_by_step = false;
+                                        app.hint_text = oper + "processing...";
                                         polygon_set.pop_back();
                                         break;
                                     }

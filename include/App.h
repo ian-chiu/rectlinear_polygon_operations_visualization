@@ -22,8 +22,7 @@ public:
     void render(const Solution &solution, bool can_draw_shapes = true);
 
     sf::RenderWindow window;
-    sf::Text hint_text;
-    sf::Text mouse_text;
+    std::string hint_text;
     sf::Clock deltaClock;
     bool split_mode{ false };
     bool is_step_by_step{ true };
@@ -39,4 +38,5 @@ private:
     inline sf::Vector2f plotPos(float x, float y);
     void draw_rectangles(const std::vector<Rect> &rects);
     void draw_polygon_set(const PolygonSet &ps);
+    void show_hint_window();
 };

@@ -41,14 +41,14 @@ int main()
                         switch (event.key.code)
                         {
                         case sf::Keyboard::Space:
-                            app.hint_text.setString(oper + " processing...");
+                            app.hint_text = oper + " processing...";
                             can_start_oper = true;
                             app.is_step_by_step = false;
                             operations.pop_front();
                             break;
 
                         case sf::Keyboard::Enter:
-                            app.hint_text.setString(oper + " processing...");
+                            app.hint_text = oper + " processing...";
                             can_start_oper = true;
                             app.is_step_by_step = true;
                             operations.pop_front();
@@ -62,8 +62,8 @@ int main()
                     std::string message{ "Operation " + oper };
                     message += "\n\t(1) Press Spacebar to execute the whole operation\n";
                     message += "\t(2) Press Enter to execute step by step";
-                    app.hint_text.setString(message);
-                    app.render(solution);
+                    app.hint_text = message;
+                  app.render(solution);
                 }
                 else
                 {
@@ -107,14 +107,12 @@ int main()
             if (app.split_mode) 
             {
                 message += "Press \"esc\" to change to non-split version...";
-                app.hint_text.setString(message);
-            }
-            else
+                app.hint_text = message;
+            }            else
             {
                 message += "Press \"s\" to change to split mode("+ solution.get_split_method() +")...";
-                app.hint_text.setString(message);
-            }
-            
+                app.hint_text = message;
+            }            
             app.render(solution);
         }
     }
