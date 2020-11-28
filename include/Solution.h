@@ -25,10 +25,11 @@ public:
     ~Solution();
 
     void read_operations();
-    void execute_and_render_operation(std::string oper, App &app);
+    void execute_and_render_operations(App &app);
     void execute_split();
-    std::deque<std::string> copy_operations();
-    std::string get_split_method();
+    std::queue<std::string> copy_operations() const;
+
+    std::string get_split_method() const;
 
 private:
     std::ifstream input_file;

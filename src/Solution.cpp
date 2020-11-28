@@ -34,108 +34,95 @@ void Solution::read_operations()
     operations.pop_back();
 }
 
-std::deque<std::string> Solution::copy_operations()
+std::queue<std::string> Solution::copy_operations() const
 {
-    return operations;
+    return std::queue<std::string>(operations);
 }
 
-void Solution::execute_and_render_operation(std::string oper, App &app)
+void Solution::execute_and_render_operations(App &app)
 {
-
     std::string token;
     std::istringstream iss;
-    input_file.clear();
-    input_file.seekg(0, input_file.beg);
-    std::string line;
-    int line_cnt = 0;
-    while (getline(input_file, line))
+    while (!app.operations_queue.empty())
     {
-        line_cnt++;
-        if (line[0] != 'D')
+        app.pop_operations_queue();
+        input_file.clear();
+        input_file.seekg(0, input_file.beg);
+        std::string line;
+        int line_cnt = 0;
+        while (getline(input_file, line))
         {
-            continue;
-        }
-        if (line.rfind(oper) != std::string::npos)
-        {
-            while (getline(input_file, line))
+            line_cnt++;
+            if (line[0] != 'D')
             {
-                line_cnt++;
-                iss.clear();
-                iss.str(line);
-                iss >> token;
-                if (token == "END")
+                continue;
+            }
+            if (line.rfind(app.curr_oper) != std::string::npos)
+            {
+                int nRemains = find_remain_polygons(line_cnt);
+                while (getline(input_file, line) && nRemains > 0)
                 {
-                    break;
-                }
-                if (token == "POLYGON")
-                {
-                    Polygon_Holes polygon;
-                    std::vector<Point> pts{};
-                    pts.reserve(10);
-
-                    int x{}, y{};
-                    while (iss >> x)
+                    line_cnt++;
+                    iss.clear();
+                    iss.str(line);
+                    iss >> token;
+                    if (token == "END")
                     {
-                        iss >> y;
-                        pts.push_back(gtl::construct<Point>(x, y));
+                        break;
                     }
-                    pts.pop_back();
-                    gtl::set_points(polygon, pts.begin(), pts.end());
-
-                    // ---------render and execute operation on polygon set----------
-                    if (app.is_step_by_step)
+                    if (token == "POLYGON")
                     {
-                        int nRemains = find_remain_polygons(line_cnt);
-                        polygon_set.push_back(polygon);
-                        bool can_start_step = false;
-                        std::string message = oper + " current Task:\n\t";
-                        message += (oper[0] == 'M') ? "MERGE " : "CLIP ";
+                        Polygon_Holes polygon;
+                        std::vector<Point> pts{};
+                        pts.reserve(10);
+
+                        int x{}, y{};
+                        while (iss >> x)
+                        {
+                            iss >> y;
+                            pts.push_back(gtl::construct<Point>(x, y));
+                        }
+                        pts.pop_back();
+                        gtl::set_points(polygon, pts.begin(), pts.end());
+
+                        nRemains = find_remain_polygons(line_cnt);
+                        std::string message = app.curr_oper + " current Task:\n\t";
+                        message += (app.curr_oper[0] == 'M') ? "MERGE " : "CLIP ";
                         message += line;
                         message += "\n\t(remain " + std::to_string(nRemains) + " polygons that need to operate...)";
                         app.hint_text = message;
-                        while(!can_start_step) 
-                        {
-                            sf::Event event;
-                            while (app.window.pollEvent(event))
-                            {
-                                ImGui::SFML::ProcessEvent(event);
-                                if (event.type == sf::Event::Closed)
-                                {
-                                    app.window.close();
-                                }
-                                else if (event.type == sf::Event::KeyPressed)
-                                {
-                                    switch (event.key.code)
-                                    {
-                                    case sf::Keyboard::Enter:
-                                        can_start_step = true;
-                                        app.hint_text = oper + "processing...";
-                                        polygon_set.pop_back();
-                                        break;
 
-                                    case sf::Keyboard::Space:
-                                        can_start_step = true;
-                                        app.is_step_by_step = false;
-                                        app.hint_text = oper + "processing...";
-                                        polygon_set.pop_back();
-                                        break;
-                                    }
-                                }
+                        // ---------render and execute operation on polygon set----------
+                        if (app.is_step_by_step && app.step_cnt == 0)
+                        {
+                            polygon_set.push_back(polygon);
+                            while(!app.can_start_step) 
+                            {
+                                app.render(*this);
                             }
-                            app.render(*this);
+                            app.can_start_step = false;
+                            polygon_set.pop_back();
                         }
+                        
+                        if (app.curr_oper[0] == 'M') 
+                            polygon_set += polygon;
+                        if (app.curr_oper[0] == 'C')
+                            polygon_set -= polygon;
+                        if (app.step_cnt > 0)
+                            app.step_cnt--;
+                        app.render(*this, false);
                     }
-                    
-                    if (oper[0] == 'M') 
-                        polygon_set += polygon;
-                    if (oper[0] == 'C')
-                        polygon_set -= polygon;
-                    app.render(*this, false);
                 }
+                app.hint_text = app.curr_oper + " is Done\n";
+                app.render(*this);
+                app.is_step_by_step = true;
+                app.step_cnt = 0;
+                break;
             }
-            break;
         }
     }
+    this->execute_split();
+    app.isAllDone = true;
 }
 
 void Solution::execute_split()
@@ -156,7 +143,7 @@ void Solution::execute_split()
     output_file.close();
 }
 
-std::string Solution::get_split_method()
+std::string Solution::get_split_method() const
 {
     return split_method;
 }
