@@ -43,14 +43,14 @@ void Solution::execute_and_render_operations(App &app)
 {
     std::string token;
     std::istringstream iss;
-    while (!app.operations_queue.empty())
+    while (!app.operations_queue.empty() && app.window.isOpen())
     {
         app.pop_operations_queue();
         input_file.clear();
         input_file.seekg(0, input_file.beg);
         std::string line;
         int line_cnt = 0;
-        while (getline(input_file, line))
+        while (getline(input_file, line) && app.window.isOpen())
         {
             line_cnt++;
             if (line[0] != 'D')
@@ -86,8 +86,11 @@ void Solution::execute_and_render_operations(App &app)
                         gtl::set_points(polygon, pts.begin(), pts.end());
 
                         nRemains = find_remain_polygons(line_cnt);
-                        std::string message = app.curr_oper + " current Task:\n\t";
+                        std::string message;
+                        message += "Current Operation: ";
                         message += (app.curr_oper[0] == 'M') ? "MERGE " : "CLIP ";
+                        message += app.curr_oper + "\n";
+                        message += "Current Task (at line " + std::to_string(line_cnt) + "):\n\t";
                         message += line;
                         message += "\n\t(remain " + std::to_string(nRemains) + " polygons that need to operate...)";
                         app.hint_text = message;
@@ -96,7 +99,7 @@ void Solution::execute_and_render_operations(App &app)
                         if (app.is_step_by_step && app.step_cnt == 0)
                         {
                             polygon_set.push_back(polygon);
-                            while(!app.can_start_step) 
+                            while(!app.can_start_step && app.window.isOpen()) 
                             {
                                 app.render(*this);
                             }

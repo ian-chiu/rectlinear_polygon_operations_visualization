@@ -30,15 +30,11 @@ public:
     sf::Clock deltaClock;
     bool split_mode{ false };
     bool is_step_by_step{ true };
-    // void App::events_handling_before_operations(bool &can_start_oper);
-    // void App::events_handling_after_operations();
     void set_operations(const Solution &sol);
     void pop_operations_queue();
 
 private:
     struct AppConsole;
-
-private:
     int win_width;
     int win_height;
     sf::Font font;
@@ -49,10 +45,6 @@ private:
     float bg_rbg[3] = { 0.f, 0.f, 0.f };
     float board_rbg[3] = { 25.0f / 255.f, 68.0f / 255.f, 43.0f / 255.f };
     inline sf::Vector2f plotPos(float x, float y);
-
     void draw_rectangles(const std::vector<Rect> &rects);
-
     void draw_polygon_set(const PolygonSet &ps);
-    void show_hint_window();
-    void show_color_window();
 };
