@@ -74,6 +74,11 @@ struct App::AppConsole
 
 
         ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+
+        sf::Vector2f mousePlotPos = connect_app->plotPos(sf::Mouse::getPosition(connect_app->window).x, sf::Mouse::getPosition(connect_app->window).y);
+        ImGui::Text("Mouse Position: (%.1f,%.1f)", mousePlotPos.x, mousePlotPos.y);
+        ImGui::Separator();
+
         ImGui::Text("Operation Order: ");
         for (const auto &oper_str : connect_app->all_operations) 
         {
