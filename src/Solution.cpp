@@ -84,7 +84,8 @@ void Solution::execute_and_render_operations(App &app)
                         pts.pop_back();
                         gtl::set_points(polygon, pts.begin(), pts.end());
 
-                        nRemains = find_remain_polygons(line_cnt);
+                        nRemains--;
+
                         std::string message;
                         message += "Current Operation: ";
                         message += (app.curr_oper[0] == 'M') ? "MERGE " : "CLIP ";
