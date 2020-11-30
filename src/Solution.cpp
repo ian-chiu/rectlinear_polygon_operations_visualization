@@ -31,12 +31,11 @@ void Solution::read_operations()
         operations.push_back(token);
     }
     split_method = operations.back();
-    operations.pop_back();
 }
 
-std::queue<std::string> Solution::copy_operations() const
+std::vector<std::string> Solution::copy_operations() const
 {
-    return std::queue<std::string>(operations);
+    return std::vector<std::string>(operations);
 }
 
 void Solution::execute_and_render_operations(App &app)
@@ -114,9 +113,10 @@ void Solution::execute_and_render_operations(App &app)
                         if (app.step_cnt > 0)
                             app.step_cnt--;
                         app.render(*this, false);
+                        app.is_start_first_oper = true;
                     }
                 }
-                app.hint_text = app.curr_oper + " is Done\n";
+                // app.hint_text = app.curr_oper + " is Done\n";
                 app.render(*this);
                 app.is_step_by_step = true;
                 app.step_cnt = 0;
@@ -125,6 +125,7 @@ void Solution::execute_and_render_operations(App &app)
         }
     }
     this->execute_split();
+    app.curr_oper = app.all_operations.back();
     app.isAllDone = true;
 }
 

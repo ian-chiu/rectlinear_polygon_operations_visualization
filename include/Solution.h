@@ -8,7 +8,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <deque>
 #include <future>
 #include <vector>
 #include "App.h"
@@ -27,7 +26,7 @@ public:
     void read_operations();
     void execute_and_render_operations(App &app);
     void execute_split();
-    std::queue<std::string> copy_operations() const;
+    std::vector<std::string> copy_operations() const;
 
     std::string get_split_method() const;
 
@@ -35,7 +34,7 @@ private:
     std::ifstream input_file;
     std::ofstream output_file;
     std::string input_file_path;
-    std::deque<std::string> operations{};
+    std::vector<std::string> operations{};
     std::vector<Rect> output_rects{};
     PolygonSet polygon_set{};
     std::string split_method{ "SH" };
