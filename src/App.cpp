@@ -211,6 +211,14 @@ void App::render(const Solution &sol, bool can_draw_shapes)
         {
             window.close();
         }
+        else if (event.type == sf::Event::Resized)
+        {
+            // update the view to the new size of the window
+            win_height = event.size.height;
+            win_width = event.size.width;
+            window.setView(sf::View(sf::FloatRect(0.f, 0.f, win_width, win_height)));
+        }
+
         if (isAllDone)
         {
             if (event.type == sf::Event::KeyPressed) 
