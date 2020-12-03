@@ -22,7 +22,7 @@ App::App(int w, int h)
     texture.update(image);
     texture.setRepeated(true);
 
-    window.create(sf::VideoMode(win_width, win_height), "Visualization");
+    window.create(sf::VideoMode(win_width, win_height), "Visualization", sf::Style::Close | sf::Style::Resize);
     window.setVerticalSyncEnabled(true);
     ImGui::SFML::Init(window, false);
     window.resetGLStates();
@@ -33,6 +33,7 @@ App::App(int w, int h)
     ImGui::GetIO().Fonts->AddFontFromFileTTF(font_path.c_str(), 25.f);
     ImGui::SFML::UpdateFontTexture(); 
 
+    // camera.reset(sf::FloatRect(0.f, 0.f, win_width, win_height));
     lines.reserve(100000);
 }
 
@@ -75,7 +76,10 @@ struct App::AppConsole
 
         ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 
-        sf::Vector2f mousePlotPos = connect_app->plotPos(sf::Mouse::getPosition(connect_app->window).x, sf::Mouse::getPosition(connect_app->window).y);
+        sf::Vector2i pixelPos = sf::Mouse::getPosition(connect_app->window);
+        sf::Vector2f worldPos = connect_app->window.mapPixelToCoords(pixelPos);
+
+        sf::Vector2f mousePlotPos = connect_app->plotPos(worldPos.x, worldPos.y);
         ImGui::Text("Mouse Position: (%.1f,%.1f)", mousePlotPos.x, mousePlotPos.y);
         ImGui::Separator();
 
@@ -218,10 +222,21 @@ void App::render(const Solution &sol, bool can_draw_shapes)
             win_width = event.size.width;
             window.setView(sf::View(sf::FloatRect(0.f, 0.f, win_width, win_height)));
         }
-
-        if (isAllDone)
+        else if (event.type == sf::Event::KeyPressed)
         {
-            if (event.type == sf::Event::KeyPressed) 
+            switch (event.key.code)
+            {
+            // case sf::Keyboard::Subtract:
+                // camera.setSize(sf::Vector2f())
+                // if (worldScale >= 0.01f)
+                //     worldScale -= 0.01f;
+                // break;
+            // case sf::Keyboard::Add:
+            //     if (worldScale <= 1.0f)
+            //         worldScale += 0.01f;
+            //     break;
+            }
+            if (isAllDone)
             {
                 switch (event.key.code) 
                 {
@@ -245,6 +260,7 @@ void App::render(const Solution &sol, bool can_draw_shapes)
     window.clear(bgColor);
     if (can_draw_shapes)
     {
+        // split_mode ? draw_rectangles(sol.output_rects) : draw_polygon_set(sol.polygon_set);
         draw_polygon_set(sol.polygon_set);
         if (split_mode)
             draw_rects_edge(sol.output_rects);
@@ -277,24 +293,24 @@ sf::Vector2f App::plotPos(float x, float y)
     return {x, win_height - y};
 }
 
-// void App::draw_rectangles(const std::vector<Rect> &rects)
-// {
-//     sf::RectangleShape rectShape;
-//     rectShape.setTexture(&texture);
-//     rectShape.setFillColor(boardColor);
-//     rectShape.setOutlineColor(sf::Color::White);
-//     rectShape.setOutlineThickness(-1.f);
+void App::draw_rectangles(const std::vector<Rect> &rects)
+{
+    sf::RectangleShape rectShape;
+    rectShape.setTexture(&texture);
+    rectShape.setFillColor(boardColor);
+    rectShape.setOutlineColor(sf::Color::White);
+    rectShape.setOutlineThickness(-1.f);
 
-//     std::vector<sf::Vertex> lines;
-//     for (auto rect : rects)
-//     {
-//         float rect_width = rect.get(gtl::HORIZONTAL).high() - rect.get(gtl::HORIZONTAL).low();
-//         float rect_height = rect.get(gtl::VERTICAL).high() - rect.get(gtl::VERTICAL).low();
-//         rectShape.setSize(sf::Vector2f(rect_width, rect_height));
-//         rectShape.setPosition(plotPos(gtl::xl(rect), gtl::yh(rect)));
-//         window.draw(rectShape);
-//     }
-// }
+    std::vector<sf::Vertex> lines;
+    for (auto rect : rects)
+    {
+        float rect_width = rect.get(gtl::HORIZONTAL).high() - rect.get(gtl::HORIZONTAL).low();
+        float rect_height = rect.get(gtl::VERTICAL).high() - rect.get(gtl::VERTICAL).low();
+        rectShape.setSize(sf::Vector2f(rect_width, rect_height));
+        rectShape.setPosition(plotPos(gtl::xl(rect), gtl::yh(rect)));
+        window.draw(rectShape);
+    }
+}
 
 void App::draw_rects_edge(const std::vector<Rect> &rects)
 {
@@ -342,11 +358,14 @@ void App::draw_polygon_set(const PolygonSet &ps)
             concave.setPoint(cnt, plotPos(gtl::x(*vertex), gtl::y(*vertex)));
             cnt++;
         }
+        // concave.setOrigin(sf::Vector2f(win_width / 2.0f, win_height / 2.0f));
+        // concave.scale(sf::Vector2f(worldScale, worldScale));
         window.draw(concave);
         polygon_cnt++;
 
         // draw holes inside polygon if there are holes
-        if (poly.begin_holes() != poly.end_holes())
+        
+        if (poly.size_holes() != 0)
         {
             // concave.setOutlineColor(sf::Color::Yellow);
             concave.setFillColor(bgColor);
@@ -359,8 +378,9 @@ void App::draw_polygon_set(const PolygonSet &ps)
                     concave.setPoint(cnt, plotPos(gtl::x(*hole_vertex), gtl::y(*hole_vertex)));
                     cnt++;
                 }
+                window.draw(concave);
             }
-            window.draw(concave);
+            // concave.scale(sf::Vector2f(worldScale, worldScale));
         }
     }
 }

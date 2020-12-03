@@ -44,13 +44,17 @@ private:
     sf::Color bgColor{ sf::Color::Black };
     sf::Color operColor{ 246, 164, 58, 100 };
     std::string curr_oper;
+
+    // float worldScale = 1.0f;
+    // sf::View camera;
+
     int step_cnt{};
     bool is_start_first_oper{ false };
     float bg_rbg[3] = { 0.f, 0.f, 0.f };
     float board_rbg[3] = { 25.0f / 255.f, 68.0f / 255.f, 43.0f / 255.f };
     float oper_rbg[3] = { 246.0f / 255.f, 164.0f / 255.f, 58.0f / 255.f };
     sf::Vector2f plotPos(float x, float y);
-    // void draw_rectangles(const std::vector<Rect> &rects);
+    void draw_rectangles(const std::vector<Rect> &rects);
     void draw_rects_edge(const std::vector<Rect> &rects);
     std::vector<sf::Vertex> lines;
     void draw_polygon_set(const PolygonSet &ps);
