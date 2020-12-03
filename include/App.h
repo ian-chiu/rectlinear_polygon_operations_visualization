@@ -45,8 +45,9 @@ private:
     sf::Color operColor{ 246, 164, 58, 100 };
     std::string curr_oper;
 
-    // float worldScale = 1.0f;
-    // sf::View camera;
+    sf::View camera;
+    float camera_speed = 0.5f;
+    float worldScale = 1.0f;
 
     int step_cnt{};
     bool is_start_first_oper{ false };

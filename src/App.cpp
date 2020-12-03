@@ -33,7 +33,10 @@ App::App(int w, int h)
     ImGui::GetIO().Fonts->AddFontFromFileTTF(font_path.c_str(), 25.f);
     ImGui::SFML::UpdateFontTexture(); 
 
-    // camera.reset(sf::FloatRect(0.f, 0.f, win_width, win_height));
+    // camera.setSize(sf::Vector2f(win_width, win_height));
+    // camera.setCenter(sf::Vector2f(0.0f, 0.0f));
+    camera.reset(sf::FloatRect(0.0f, 0.0f, win_width, win_height));
+    window.setView(camera);
     lines.reserve(100000);
 }
 
@@ -81,6 +84,9 @@ struct App::AppConsole
 
         sf::Vector2f mousePlotPos = connect_app->plotPos(worldPos.x, worldPos.y);
         ImGui::Text("Mouse Position: (%.1f,%.1f)", mousePlotPos.x, mousePlotPos.y);
+        ImGui::Separator();
+
+        ImGui::Text("World Scale: %.1f %%", connect_app->worldScale * 100.0f);
         ImGui::Separator();
 
         ImGui::Text("Operation Order: ");
@@ -220,22 +226,11 @@ void App::render(const Solution &sol, bool can_draw_shapes)
             // update the view to the new size of the window
             win_height = event.size.height;
             win_width = event.size.width;
-            window.setView(sf::View(sf::FloatRect(0.f, 0.f, win_width, win_height)));
+            // camera.setSize(sf::Vector2f(win_width * (1 + (1 - worldScale)), win_height * (1 + (1 - worldScale))));
+            window.setView(camera);
         }
         else if (event.type == sf::Event::KeyPressed)
         {
-            switch (event.key.code)
-            {
-            // case sf::Keyboard::Subtract:
-                // camera.setSize(sf::Vector2f())
-                // if (worldScale >= 0.01f)
-                //     worldScale -= 0.01f;
-                // break;
-            // case sf::Keyboard::Add:
-            //     if (worldScale <= 1.0f)
-            //         worldScale += 0.01f;
-            //     break;
-            }
             if (isAllDone)
             {
                 switch (event.key.code) 
@@ -250,6 +245,41 @@ void App::render(const Solution &sol, bool can_draw_shapes)
                 }
             }
         }
+    }
+
+    sf::Time elapsed_time = deltaClock.getElapsedTime();
+    int ms = elapsed_time.asMilliseconds();
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+    {
+        camera.move( 0.0f, -camera_speed * worldScale * ms );
+        window.setView(camera);
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+    {
+        camera.move( 0.0f, camera_speed * worldScale * ms );
+        window.setView(camera);
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+    {
+        camera.move( -camera_speed * worldScale * ms, 0.0f );
+        window.setView(camera);
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+    {
+        camera.move( camera_speed * worldScale * ms, 0.0f );
+        window.setView(camera);
+    }
+    if (worldScale >= 0.01f && sf::Keyboard::isKeyPressed(sf::Keyboard::Add))
+    {
+        worldScale *= 0.95;
+        camera.zoom(0.95);
+        window.setView(camera);
+    }
+    if (worldScale <= 1000.0f &&sf::Keyboard::isKeyPressed(sf::Keyboard::Subtract))
+    {
+        worldScale *= 1.05;
+        camera.zoom(1.05);
+        window.setView(camera);
     }
 
     ImGui::SFML::Update(window, deltaClock.restart());
