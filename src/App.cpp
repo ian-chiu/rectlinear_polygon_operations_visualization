@@ -89,6 +89,9 @@ struct App::AppConsole
         ImGui::Text("World Scale: %.1f %%", connect_app->worldScale * 100.0f);
         ImGui::Separator();
 
+        ImGui::Text("Camera Center: (%.1f,%.1f)", connect_app->camera.getCenter().x, connect_app->win_height - connect_app->camera.getCenter().y);
+        ImGui::Separator();
+
         ImGui::Text("Operation Order: ");
         for (const auto &oper_str : connect_app->all_operations) 
         {
@@ -111,7 +114,7 @@ struct App::AppConsole
 
         if (!connect_app->isAllDone)
         {
-            ImGui::Text( connect_app->hint_text.c_str() );
+            ImGui::TextWrapped( connect_app->hint_text.c_str() );
             ImGui::Separator();
             ImGui::Text(
                 "commands:\n"
@@ -226,24 +229,34 @@ void App::render(const Solution &sol, bool can_draw_shapes)
             // update the view to the new size of the window
             win_height = event.size.height;
             win_width = event.size.width;
-            // camera.setSize(sf::Vector2f(win_width * (1 + (1 - worldScale)), win_height * (1 + (1 - worldScale))));
+            camera.setSize(win_width, win_height);
             window.setView(camera);
         }
         else if (event.type == sf::Event::KeyPressed)
         {
-            if (isAllDone)
+            switch (event.key.code) 
             {
-                switch (event.key.code) 
-                {
-                case sf::Keyboard::S:
-                    split_mode = true;
-                    break;
-                
-                case sf::Keyboard::Escape:
-                    split_mode = false;
-                    break;
-                }
-            }
+            case sf::Keyboard::S:
+                if (isAllDone)  split_mode = true;
+                break;
+            
+            case sf::Keyboard::Escape:
+                if (isAllDone)  split_mode = false;
+                break;
+            
+            case sf::Keyboard::Enter:
+                can_start_step = true;
+                break;
+
+            case sf::Keyboard::O:
+                focusMode = !focusMode;
+                break;
+
+            case sf::Keyboard::F:
+                camera.setCenter(focusPoint);
+                window.setView(camera);
+                break;
+            }   
         }
     }
 
@@ -273,12 +286,14 @@ void App::render(const Solution &sol, bool can_draw_shapes)
     {
         worldScale *= 0.95;
         camera.zoom(0.95);
+        // camera.setSize(win_width * (1 + (1 - worldScale)), win_height * (1 + (1 - worldScale)));
         window.setView(camera);
     }
-    if (worldScale <= 1000.0f &&sf::Keyboard::isKeyPressed(sf::Keyboard::Subtract))
+    if (worldScale <= 1000000.0f &&sf::Keyboard::isKeyPressed(sf::Keyboard::Subtract))
     {
         worldScale *= 1.05;
         camera.zoom(1.05);
+        // camera.setSize(win_width * (1 + (1 - worldScale)), win_height * (1 + (1 - worldScale)));
         window.setView(camera);
     }
 
@@ -321,6 +336,11 @@ void App::pop_operations_queue()
 sf::Vector2f App::plotPos(float x, float y)
 {
     return {x, win_height - y};
+}
+
+sf::Vector2f App::plotPos(const sf::Vector2f &pt)
+{
+    return pt;
 }
 
 void App::draw_rectangles(const std::vector<Rect> &rects)
@@ -388,13 +408,10 @@ void App::draw_polygon_set(const PolygonSet &ps)
             concave.setPoint(cnt, plotPos(gtl::x(*vertex), gtl::y(*vertex)));
             cnt++;
         }
-        // concave.setOrigin(sf::Vector2f(win_width / 2.0f, win_height / 2.0f));
-        // concave.scale(sf::Vector2f(worldScale, worldScale));
         window.draw(concave);
         polygon_cnt++;
 
         // draw holes inside polygon if there are holes
-        
         if (poly.size_holes() != 0)
         {
             // concave.setOutlineColor(sf::Color::Yellow);

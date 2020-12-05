@@ -5,7 +5,7 @@
 namespace gtl = boost::polygon;
 
 typedef gtl::polygon_90_with_holes_data<int>           Polygon_Holes;
-typedef gtl::polygon_data<int>                         Polygon_NoHoles;
+typedef gtl::polygon_90_data<int>                      Polygon_NoHoles;
 typedef gtl::rectangle_data<int>                       Rect;
 typedef gtl::polygon_traits<Polygon_Holes>::point_type Point;
 typedef std::vector<Polygon_Holes>                     PolygonSet;

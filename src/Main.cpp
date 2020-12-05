@@ -21,7 +21,8 @@ int main()
         while (app.window.isOpen())
         {
             // ----------------EXECUTE OPERATIONS----------------
-            solution.execute_and_render_operations(app);
+            if (!app.isAllDone)
+                solution.execute_and_render_operations(app);
 
             // ------------ALL OPERATIONS ARE DONE-----------------
             app.render(solution);

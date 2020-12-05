@@ -2,6 +2,15 @@
 #include <limits>
 using namespace gtl::operators;
 
+struct RangeBox
+{
+    int left{};
+    int right{};
+    int bottom{};
+    int top{};
+    bool is_initialize = false;
+};
+
 Solution::Solution(std::string infile, std::string outfile) 
     : input_file(infile), output_file(outfile), input_file_path(infile)
 {
@@ -42,6 +51,7 @@ void Solution::execute_and_render_operations(App &app)
 {
     std::string token;
     std::istringstream iss;
+    RangeBox rangeBox;
     while (!app.operations_queue.empty() && app.window.isOpen())
     {
         app.pop_operations_queue();
@@ -71,14 +81,25 @@ void Solution::execute_and_render_operations(App &app)
                     }
                     if (token == "POLYGON")
                     {
+                        // TODO: fix the hole error
                         Polygon_Holes polygon;
                         std::vector<Point> pts{};
                         pts.reserve(10);
 
                         int x{}, y{};
+                        int min_x{-1}, max_x{-1}, min_y{-1}, max_y{-1};
                         while (iss >> x)
                         {
                             iss >> y;
+                            if (max_x == -1)    max_x = x;
+                            if (min_x == -1)    min_x = x;
+                            if (min_y == -1)    min_y = y;
+                            if (max_y == -1)    max_y = y;
+                            if (x < min_x)      min_x = x;
+                            if (x > max_x)      max_x = x;
+                            if (y < min_y)      min_y = y;
+                            if (y > max_y)      max_y = y;
+
                             pts.push_back(gtl::construct<Point>(x, y));
                         }
                         pts.pop_back();
@@ -94,6 +115,32 @@ void Solution::execute_and_render_operations(App &app)
                         message += line;
                         message += "\n\t(remain " + std::to_string(nRemains) + " polygons that need to operate...)";
                         app.hint_text = message;
+
+                        // sf::Vector2f worldPos = app.plotPos(pts[0].x(), pts[0].y());
+                        // sf::Vector2i pixelPos = app.window.mapCoordsToPixel(worldPos);
+                        // while (pixelPos.x >= 500.0f)
+                        // {
+                        //     app.camera.zoom(1.05);
+                        //     app.window.setView(app.camera);
+                        //     pixelPos = app.window.mapCoordsToPixel(worldPos);
+                        // }
+                        // app.camera.zoom(std::abs(pts[1].x() - pts[0].x()) / 100);
+
+                        app.focusPoint = app.plotPos((max_x + min_x)/2.0f, (max_y + min_y)/2.0f);
+                        if (app.focusMode)
+                        {
+                            app.camera.setCenter(app.focusPoint);
+                            app.window.setView(app.camera);
+                        }
+
+                        if (!rangeBox.is_initialize)
+                        {
+                            rangeBox = {min_x, max_x, min_y, max_y, true};
+                        }
+                        if (min_x < rangeBox.left)      rangeBox.left = min_x;
+                        if (max_y > rangeBox.top)       rangeBox.top = max_y;
+                        if (max_x > rangeBox.right)     rangeBox.right = max_x;
+                        if (min_y < rangeBox.bottom)   rangeBox.bottom = min_y;   
 
                         // ---------render and execute operation on polygon set----------
                         if (app.is_step_by_step && app.step_cnt == 0)
@@ -127,6 +174,7 @@ void Solution::execute_and_render_operations(App &app)
     }
     this->execute_split();
     app.curr_oper = app.all_operations.back();
+    app.focusPoint = app.plotPos((rangeBox.right + rangeBox.left)/2.0f, (rangeBox.top + rangeBox.bottom)/2.0f);
     app.isAllDone = true;
 }
 
