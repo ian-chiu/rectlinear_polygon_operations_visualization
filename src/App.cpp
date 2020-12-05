@@ -350,8 +350,6 @@ void App::draw_rectangles(const std::vector<Rect> &rects)
     rectShape.setFillColor(boardColor);
     rectShape.setOutlineColor(sf::Color::White);
     rectShape.setOutlineThickness(-1.f);
-
-    std::vector<sf::Vertex> lines;
     for (auto rect : rects)
     {
         float rect_width = rect.get(gtl::HORIZONTAL).high() - rect.get(gtl::HORIZONTAL).low();
@@ -364,7 +362,6 @@ void App::draw_rectangles(const std::vector<Rect> &rects)
 
 void App::draw_rects_edge(const std::vector<Rect> &rects)
 {
-    std::vector<sf::Vertex> lines;
     for (auto rect : rects)
     {
         sf::Vertex lb(plotPos(gtl::xl(rect), gtl::yl(rect)), sf::Color::White);
