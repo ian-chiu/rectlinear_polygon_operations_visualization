@@ -43,6 +43,9 @@ private:
     sf::Color boardColor{ 25, 68, 43 };
     sf::Color bgColor{ sf::Color::Black };
     sf::Color operColor{ 246, 164, 58, 100 };
+    float bg_rbg[3] = { 0.f, 0.f, 0.f };
+    float board_rbg[3] = { 25.0f / 255.f, 68.0f / 255.f, 43.0f / 255.f };
+    float oper_rbg[3] = { 246.0f / 255.f, 164.0f / 255.f, 58.0f / 255.f };
     std::string curr_oper;
 
     sf::View camera;
@@ -52,13 +55,11 @@ private:
     float worldScale = 1.0f;
 
     int step_cnt{};
-    bool is_start_first_oper{ false };
-    float bg_rbg[3] = { 0.f, 0.f, 0.f };
-    float board_rbg[3] = { 25.0f / 255.f, 68.0f / 255.f, 43.0f / 255.f };
-    float oper_rbg[3] = { 246.0f / 255.f, 164.0f / 255.f, 58.0f / 255.f };
+    bool is_start_first_oper{ true };
     sf::Vector2f plotPos(float x, float y);
     sf::Vector2f plotPos(const sf::Vector2f &pt);
     void draw_rectangles(const std::vector<Rect> &rects);
+    sf::VertexArray quads;
     void draw_rects_edge(const std::vector<Rect> &rects);
     std::vector<sf::Vertex> lines;
     void draw_polygon_set(const PolygonSet &ps);

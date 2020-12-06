@@ -31,6 +31,16 @@ public:
     std::string get_split_method() const;
 
 private:
+    // class Polygon : public Polygon_Holes
+    // {
+    // public:
+    //     bool input_polygon_has_hole = false;
+    // };
+    // struct Polygon
+    // {
+    //     Polygon_Holes polygon;
+    //     bool has_hole = false;
+    // };
     std::ifstream input_file;
     std::ofstream output_file;
     std::string input_file_path;
