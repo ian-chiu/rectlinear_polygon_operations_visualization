@@ -33,8 +33,6 @@ App::App(int w, int h)
     ImGui::GetIO().Fonts->AddFontFromFileTTF(font_path.c_str(), 25.f);
     ImGui::SFML::UpdateFontTexture(); 
 
-    // camera.setSize(sf::Vector2f(win_width, win_height));
-    // camera.setCenter(sf::Vector2f(0.0f, 0.0f));
     camera.reset(sf::FloatRect(0.0f, 0.0f, win_width, win_height));
     window.setView(camera);
     lines.reserve(100000);
@@ -217,6 +215,9 @@ struct App::AppConsole
 void App::render(const Solution &sol, bool can_draw_shapes)
 {
     sf::Event event;
+    sf::Time elapsed_time = deltaClock.getElapsedTime();
+    int ms = elapsed_time.asMilliseconds();
+
     while (window.pollEvent(event))
     {
         ImGui::SFML::ProcessEvent(event);
@@ -229,18 +230,32 @@ void App::render(const Solution &sol, bool can_draw_shapes)
             // update the view to the new size of the window
             win_height = event.size.height;
             win_width = event.size.width;
-            camera.setSize(win_width, win_height);
+            camera.setSize(win_width * worldScale, win_height * worldScale);
+            window.setView(camera);
+        }
+        else if (event.type == sf::Event::MouseWheelMoved)
+        {
+            if (event.mouseWheel.delta > 0)
+            {
+                worldScale /= 1.05f;
+                camera.zoom(1.0f / 1.05f);
+            }
+            else
+            {
+                worldScale *= 1.05f;
+                camera.zoom(1.05f);
+            }
             window.setView(camera);
         }
         else if (event.type == sf::Event::KeyPressed)
         {
             switch (event.key.code) 
             {
-            case sf::Keyboard::S:
+            case sf::Keyboard::Num1:
                 if (isAllDone)  split_mode = true;
                 break;
             
-            case sf::Keyboard::Escape:
+            case sf::Keyboard::Num2:
                 if (isAllDone)  split_mode = false;
                 break;
             
@@ -258,44 +273,61 @@ void App::render(const Solution &sol, bool can_draw_shapes)
                 break;
             }   
         }
+        // TODO: if we click in the console window the camera will also move
+        // else if (event.type == sf::Event::MouseButtonPressed)
+        // {
+        //     sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+        //     sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+        //     sf::Vector2f mousePlotPos = plotPos(worldPos);
+        //     camera.setCenter(mousePlotPos);
+        //     window.setView(camera);
+        // }
     }
 
-    sf::Time elapsed_time = deltaClock.getElapsedTime();
-    int ms = elapsed_time.asMilliseconds();
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::W))
     {
-        camera.move( 0.0f, -camera_speed * worldScale * ms );
+        camera.move( 0.0f, -camera_speed * ms * worldScale );
         window.setView(camera);
     }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) || sf::Keyboard::isKeyPressed(sf::Keyboard::S))
     {
-        camera.move( 0.0f, camera_speed * worldScale * ms );
+        camera.move( 0.0f, camera_speed * ms * worldScale );
         window.setView(camera);
     }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::A))
     {
-        camera.move( -camera_speed * worldScale * ms, 0.0f );
+        camera.move( -camera_speed * ms * worldScale, 0.0f );
         window.setView(camera);
     }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) || sf::Keyboard::isKeyPressed(sf::Keyboard::D))
     {
-        camera.move( camera_speed * worldScale * ms, 0.0f );
+        camera.move( camera_speed * ms * worldScale, 0.0f );
         window.setView(camera);
     }
     if (worldScale >= 0.01f && sf::Keyboard::isKeyPressed(sf::Keyboard::Add))
     {
-        worldScale *= 0.95;
-        camera.zoom(0.95);
-        // camera.setSize(win_width * (1 + (1 - worldScale)), win_height * (1 + (1 - worldScale)));
+        worldScale /= 1.05f;
+        camera.zoom(1.0f / 1.05f);
         window.setView(camera);
     }
-    if (worldScale <= 1000000.0f &&sf::Keyboard::isKeyPressed(sf::Keyboard::Subtract))
+    if (worldScale <= 10000000.0f &&sf::Keyboard::isKeyPressed(sf::Keyboard::Subtract))
     {
-        worldScale *= 1.05;
-        camera.zoom(1.05);
-        // camera.setSize(win_width * (1 + (1 - worldScale)), win_height * (1 + (1 - worldScale)));
+        worldScale *= 1.05f;
+        camera.zoom(1.05f);
         window.setView(camera);
     }
+
+    // if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+    // {
+    //     while (sf::Mouse::)
+    //     sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+    //     sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+    //     sf::Vector2f mousePlotPos = plotPos(worldPos);
+    //     camera.setCenter(mousePlotPos);
+    //     window.setView(camera);
+    // }
+
+    
 
     ImGui::SFML::Update(window, deltaClock.restart());
     static AppConsole console(this);
@@ -343,11 +375,11 @@ sf::Vector2f App::plotPos(const sf::Vector2f &pt)
     return pt;
 }
 
-void App::draw_rectangles(const std::vector<Rect> &rects)
+void App::draw_rectangles(const std::vector<Rect> &rects, const sf::Color &color)
 {
     sf::RectangleShape rectShape;
     rectShape.setTexture(&texture);
-    rectShape.setFillColor(boardColor);
+    rectShape.setFillColor(color);
     // rectShape.setOutlineColor(sf::Color::White);
     // rectShape.setOutlineThickness(-1.f);
     for (auto rect : rects)
@@ -402,40 +434,24 @@ void App::draw_polygon_set(const PolygonSet &ps)
     // draw polygons
     for (const auto &poly : ps)
     {
-        // Three variables used to determine if input noHole Polygon
-        // has Hole if it is Hole polygon
         bool operate_shape_has_hole = false;
 
         // draw the outline polygon shape
-        thor::ConcaveShape concave{};
-        concave.setFillColor(boardColor);
+        sf::Color shape_color = boardColor;
         if (!isAllDone && (polygon_cnt == ps.size() - 1 || !is_start_first_oper) )
-            concave.setFillColor(operColor);
-        // concave.setOutlineColor(sf::Color::White);
-        // concave.setOutlineThickness(2.f);
+            shape_color = operColor;
 
         // 1. if poly's size < 8 we know this polygon does not have holes
         // 2. we do not have to consider the main shape (polygon_cnt == 0)
         if (poly.size() >= 8 && (polygon_cnt != 0 || is_start_first_oper))
         {
-            for (auto pt1 = poly.begin(); pt1 != poly.end(); pt1++)
-            {
-                for (auto pt2 = poly.begin(); pt2 != poly.end(); pt2++)
-                {
-                    if (pt1 != pt2 && *pt1 == *pt2)
-                    {
-                        operate_shape_has_hole = true;
-                        break;
-                    }
-                }
-
-                if (operate_shape_has_hole)
-                    break;
-            }
+            operate_shape_has_hole = polygon_noHoles_has_hole(poly);
         }
 
         if (!operate_shape_has_hole)
         {
+            thor::ConcaveShape concave{};
+            concave.setFillColor(shape_color);
             concave.setPointCount(poly.size());
             int cnt = 0;
             for (auto vertex = poly.begin(); vertex != poly.end(); vertex++)
@@ -452,14 +468,29 @@ void App::draw_polygon_set(const PolygonSet &ps)
                 concave.setFillColor(bgColor);
                 for (auto hole = poly.begin_holes(); hole != poly.end_holes(); hole++)
                 {
-                    concave.setPointCount(hole->size());
-                    int cnt = 0;
-                    for (auto hole_vertex = hole->begin(); hole_vertex != hole->end(); hole_vertex++)
+                    bool hole_shape_has_intersection = polygon_noHoles_has_hole(*hole);
+                    if (hole->size() >= 8)
                     {
-                        concave.setPoint(cnt, plotPos(gtl::x(*hole_vertex), gtl::y(*hole_vertex)));
-                        cnt++;
+                        operate_shape_has_hole = polygon_noHoles_has_hole(poly);
                     }
-                    window.draw(concave);
+
+                    if (!hole_shape_has_intersection)
+                    {
+                        concave.setPointCount(hole->size());
+                        int cnt = 0;
+                        for (auto hole_vertex = hole->begin(); hole_vertex != hole->end(); hole_vertex++)
+                        {
+                            concave.setPoint(cnt, plotPos(gtl::x(*hole_vertex), gtl::y(*hole_vertex)));
+                            cnt++;
+                        }
+                        window.draw(concave);
+                    }
+                    else
+                    {
+                        std::vector<Rect> rect_shapes;
+                        gtl::get_rectangles(rect_shapes, *hole);
+                        draw_rectangles(rect_shapes, bgColor);
+                    }
                 }
                 // concave.scale(sf::Vector2f(worldScale, worldScale));
             }
@@ -468,9 +499,39 @@ void App::draw_polygon_set(const PolygonSet &ps)
         {   
             std::vector<Rect> rect_shapes;
             gtl::get_rectangles(rect_shapes, poly);
-            draw_rectangles(rect_shapes);
+            draw_rectangles(rect_shapes, shape_color);
         }
         
         polygon_cnt++;
     }
+}
+
+bool App::polygon_noHoles_has_hole(const Polygon_Holes &poly)
+{
+    for (auto pt1 = poly.begin(); pt1 != poly.end(); pt1++)
+    {
+        for (auto pt2 = poly.begin(); pt2 != poly.end(); pt2++)
+        {
+            if (pt1 != pt2 && *pt1 == *pt2)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool App::polygon_noHoles_has_hole(const Polygon_NoHoles &poly)
+{
+    for (auto pt1 = poly.begin(); pt1 != poly.end(); pt1++)
+    {
+        for (auto pt2 = poly.begin(); pt2 != poly.end(); pt2++)
+        {
+            if (pt1 != pt2 && *pt1 == *pt2)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
 }

@@ -26,7 +26,6 @@ public:
     bool isAllDone = false;
     bool can_start_step = false;
     std::string hint_text;
-    sf::Clock deltaClock;
     bool split_mode{ false };
     bool is_step_by_step{ true };
     void set_operations(const Solution &sol);
@@ -34,6 +33,7 @@ public:
 
 private:
     struct AppConsole;
+    sf::Clock deltaClock;
     std::queue<std::string> operations_queue;
     std::vector<std::string> all_operations;
     int win_width;
@@ -58,9 +58,11 @@ private:
     bool is_start_first_oper{ true };
     sf::Vector2f plotPos(float x, float y);
     sf::Vector2f plotPos(const sf::Vector2f &pt);
-    void draw_rectangles(const std::vector<Rect> &rects);
+    void draw_rectangles(const std::vector<Rect> &rects, const sf::Color &color);
     sf::VertexArray quads;
     void draw_rects_edge(const std::vector<Rect> &rects);
     std::vector<sf::Vertex> lines;
     void draw_polygon_set(const PolygonSet &ps);
+    bool polygon_noHoles_has_hole(const Polygon_Holes &poly);
+    bool polygon_noHoles_has_hole(const Polygon_NoHoles &poly);
 };
