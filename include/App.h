@@ -66,9 +66,15 @@ private:
     bool polygon_noHoles_has_hole(const Polygon_Holes &poly);
     bool polygon_noHoles_has_hole(const Polygon_NoHoles &poly);
 
+    bool can_show_hintBar = true;
+    bool can_show_inputWindow = false;
+    bool can_show_colorSelector = false;
+
     void showMemuBar();
     float memuBarHeight;
+
     void showHintBar();
     void showBottomBar();
-    void showInputStepWindow();
+    void showInputWindow();
+    void showColorSelector();
 };

@@ -344,9 +344,12 @@ void App::render(const Solution &sol, bool can_draw_shapes)
     // console.Draw("Control Panel", (bool *)0);
 
     ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[2]);
+
     showMemuBar();
-    showHintBar();
+    if (can_show_hintBar)           showHintBar();
+    if (can_show_colorSelector)     showColorSelector();
     showBottomBar();
+
     ImGui::PopFont();
 
     window.clear(bgColor);
@@ -563,10 +566,10 @@ void App::showMemuBar()
             // ShowExampleMenuFile();
             ImGui::EndMenu();
         }
-        if (ImGui::BeginMenu("Edit"))
+        if (ImGui::BeginMenu("Tools"))
         {
-            if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
-            if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
+            if (ImGui::MenuItem("Hint")) { can_show_hintBar = true; }
+            if (ImGui::MenuItem("Color Selector")) { can_show_colorSelector =  true; }  // Disabled item
             ImGui::Separator();
             if (ImGui::MenuItem("Cut", "CTRL+X")) {}
             if (ImGui::MenuItem("Copy", "CTRL+C")) {}
@@ -647,7 +650,7 @@ void App::showHintBar()
     ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImVec4(25.0f / 255.0f, 25.0f / 255.0f, 25.0f / 255.0f, 1.0f));
     // ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
     // ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(255.0f / 255.0f, 20.0f / 255.0f, 20.0f / 255.0f, 1.0f));
-    if (ImGui::Begin(hint_text.c_str(), (bool *)0, window_flags))
+    if (ImGui::Begin(hint_text.c_str(), &can_show_hintBar, window_flags))
     {
         ImGui::Text(" ");
         ImGui::End();
@@ -658,7 +661,37 @@ void App::showHintBar()
     // ImGui::PopFont();
 }
 
-void App::showInputStepWindow()
+void App::showColorSelector()
 {
+    if (ImGui::Begin("Color Selector", &can_show_colorSelector))
+    {
+        if (ImGui::ColorEdit3("Background color", bg_rbg)) 
+        {
+            bgColor.r = static_cast<sf::Uint8>(bg_rbg[0] * 255.0f);
+            bgColor.g = static_cast<sf::Uint8>(bg_rbg[1] * 255.0f);
+            bgColor.b = static_cast<sf::Uint8>(bg_rbg[2] * 255.0f);
+        }
+        if (ImGui::ColorEdit3("Board color", board_rbg)) 
+        {
+            boardColor.r = static_cast<sf::Uint8>(board_rbg[0] * 255.0f);
+            boardColor.g = static_cast<sf::Uint8>(board_rbg[1] * 255.0f);
+            boardColor.b = static_cast<sf::Uint8>(board_rbg[2] * 255.0f);
+        }
+        if (!isAllDone)
+        {
+            if (ImGui::ColorEdit3("Operation color", oper_rbg)) 
+            {
+                operColor.r = static_cast<sf::Uint8>(oper_rbg[0] * 255.0f);
+                operColor.g = static_cast<sf::Uint8>(oper_rbg[1] * 255.0f);
+                operColor.b = static_cast<sf::Uint8>(oper_rbg[2] * 255.0f);
+            }
+        }
+        ImGui::End();
+    }
     
+}
+
+void App::showInputWindow()
+{
+
 }
