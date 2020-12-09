@@ -169,12 +169,12 @@ void Solution::execute_and_render_operations(App &app)
                         nRemains--;
 
                         std::string message;
-                        message += "Current Operation: ";
-                        message += (app.curr_oper[0] == 'M') ? "MERGE " : "CLIP ";
-                        message += app.curr_oper + "\n";
-                        message += "Current Task (at line " + std::to_string(line_cnt) + "):\n\t";
+                        // message += "Current Operation: ";
+                        // message += (app.curr_oper[0] == 'M') ? "MERGE " : "CLIP ";
+                        message += app.curr_oper + " ";
+                        message += "Current Task (at line " + std::to_string(line_cnt) + "): ";
                         message += line;
-                        message += "\n\t(remain " + std::to_string(nRemains) + " polygons that need to operate...)";
+                        message += " (remain " + std::to_string(nRemains) + " polygons that need to operate...)";
                         app.hint_text = message;
 
                         // sf::Vector2f worldPos = app.plotPos(pts[0].x(), pts[0].y());

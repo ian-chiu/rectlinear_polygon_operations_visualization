@@ -65,4 +65,10 @@ private:
     void draw_polygon_set(const PolygonSet &ps);
     bool polygon_noHoles_has_hole(const Polygon_Holes &poly);
     bool polygon_noHoles_has_hole(const Polygon_NoHoles &poly);
+
+    void showMemuBar();
+    float memuBarHeight;
+    void showHintBar();
+    void showBottomBar();
+    void showInputStepWindow();
 };
