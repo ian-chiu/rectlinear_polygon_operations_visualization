@@ -35,11 +35,12 @@ App::App(int w, int h)
     ImGui::SFML::UpdateFontTexture(); 
 
     ImGuiStyle& style = ImGui::GetStyle();
-    style.FramePadding      =   ImVec2( 5.0f, 5.0f );
+    // style.FramePadding      =   ImVec2( 5.0f, 5.0f );
     style.WindowRounding    =   0.0f;
-    style.Colors[ImGuiCol_WindowBg]     =   ImVec4(20.0f / 255.0f, 20.0f / 255.0f, 20.0f / 255.0f, 1.0f);
+    style.Colors[ImGuiCol_WindowBg]     =   ImVec4(36.0f / 255.0f, 36.0f / 255.0f, 36.0f / 255.0f, 1.0f);
     style.Colors[ImGuiCol_Border]       =   ImVec4(1.0f, 1.0f, 1.0f, 0.0f);
 
+    memset(InputBuf, 0, sizeof(InputBuf));
 
     camera.reset(sf::FloatRect(0.0f, 0.0f, win_width, win_height));
     window.setView(camera);
@@ -269,7 +270,8 @@ void App::render(const Solution &sol, bool can_draw_shapes)
                 break;
             
             case sf::Keyboard::Enter:
-                can_start_step = true;
+                if (!isAllDone && !can_show_inputWindow) 
+                    can_start_step = true;
                 break;
 
             case sf::Keyboard::O:
@@ -279,6 +281,15 @@ void App::render(const Solution &sol, bool can_draw_shapes)
             case sf::Keyboard::F:
                 camera.setCenter(focusPoint);
                 window.setView(camera);
+                break;
+
+            case sf::Keyboard::I:
+                if (step_cnt == 0) 
+                    can_show_inputWindow = true;
+                break;
+
+            case sf::Keyboard::Escape:
+                can_show_inputWindow = false;
                 break;
             }   
         }
@@ -326,9 +337,8 @@ void App::render(const Solution &sol, bool can_draw_shapes)
         window.setView(camera);
     }
 
-    // if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+    // if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && !ImGui::IsAnyWindowFocused())
     // {
-    //     while (sf::Mouse::)
     //     sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
     //     sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
     //     sf::Vector2f mousePlotPos = plotPos(worldPos);
@@ -348,6 +358,7 @@ void App::render(const Solution &sol, bool can_draw_shapes)
     showMemuBar();
     if (can_show_hintBar)           showHintBar();
     if (can_show_colorSelector)     showColorSelector();
+    if (can_show_inputWindow)       showInputWindow(sol.nRemains);
     showBottomBar();
 
     ImGui::PopFont();
@@ -461,12 +472,12 @@ void App::draw_polygon_set(const PolygonSet &ps)
 
         // 1. if poly's size < 8 we know this polygon does not have holes
         // 2. we do not have to consider the main shape (polygon_cnt == 0)
-        if (poly.size() >= 8 && (polygon_cnt != 0 || is_start_first_oper))
+        if (poly.size() >= 8 && (polygon_cnt == ps.size() - 1 || is_start_first_oper))
         {
             operate_shape_has_hole = polygon_noHoles_has_hole(poly);
         }
 
-        if (!operate_shape_has_hole)
+        if (!operate_shape_has_hole && (polygon_cnt == ps.size() - 1 || is_start_first_oper))
         {
             thor::ConcaveShape concave{};
             concave.setFillColor(shape_color);
@@ -569,11 +580,7 @@ void App::showMemuBar()
         if (ImGui::BeginMenu("Tools"))
         {
             if (ImGui::MenuItem("Hint")) { can_show_hintBar = true; }
-            if (ImGui::MenuItem("Color Selector")) { can_show_colorSelector =  true; }  // Disabled item
-            ImGui::Separator();
-            if (ImGui::MenuItem("Cut", "CTRL+X")) {}
-            if (ImGui::MenuItem("Copy", "CTRL+C")) {}
-            if (ImGui::MenuItem("Paste", "CTRL+V")) {}
+            if (ImGui::MenuItem("Color Selector")) { can_show_colorSelector =  true; } 
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();
@@ -585,16 +592,15 @@ void App::showBottomBar()
 {
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar;
     ImGui::SetNextWindowPos(ImVec2(0.0f, ImGui::GetIO().DisplaySize.y), 0, ImVec2(0.0f, 1.0f));
-    ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, 0.0f));
-
     // ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[2]);
     // ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0);
     // ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(10.0f, 10.0f));
     // ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, 2.0f);
     // ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(20.0f / 255.0f, 20.0f / 255.0f, 20.0f / 255.0f, 1.0f));
+    // ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(20.0f / 255.0f, 20.0f / 255.0f, 20.0f / 255.0f, 1.0f));
     if (ImGui::Begin("test", (bool *)0, window_flags))
     {
+        ImGui::SetWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, 0.0f));
         // ImGui::Columns(4, "mycolumns"); // 4-ways, with border
         sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
         sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
@@ -632,33 +638,44 @@ void App::showBottomBar()
         // ImGui::NextColumn();
         ImGui::End();
     }   
-    ImGui::PopStyleColor();
+    // ImGui::PopStyleColor();
     // ImGui::PopStyleVar();
     // ImGui::PopFont();
 }
 
 void App::showHintBar()
 {
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoBackground;
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar;
     ImGui::SetNextWindowPos(ImVec2(0.0f, memuBarHeight), 0, ImVec2(0.0f, 0.0f));
-    ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, 0.0f));
-
     // ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[2]);
     // ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0);
-    // ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2( 5.0f, 5.0f));
-    ImGui::PushStyleColor(ImGuiCol_TitleBg, ImVec4(20.0f / 255.0f, 20.0f / 255.0f, 20.0f / 255.0f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImVec4(25.0f / 255.0f, 25.0f / 255.0f, 25.0f / 255.0f, 1.0f));
-    // ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
+    
+    // ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImVec4(25.0f / 255.0f, 25.0f / 255.0f, 25.0f / 255.0f, 1.0f));
+    // ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
     // ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(255.0f / 255.0f, 20.0f / 255.0f, 20.0f / 255.0f, 1.0f));
-    if (ImGui::Begin(hint_text.c_str(), &can_show_hintBar, window_flags))
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2.0f, 2.0f));
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(20.0f / 255.0f, 20.0f / 255.0f, 20.0f / 255.0f, 0.8f));
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(40.0f / 255.0f, 40.0f / 255.0f, 40.0f / 255.0f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(20.0f / 255.0f, 20.0f / 255.0f, 20.0f / 255.0f, 1.0f));
+    if (ImGui::Begin("Hint", &can_show_hintBar, window_flags))
     {
-        ImGui::Text(" ");
+        ImGui::SetWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, 0.0f));
+        ImGui::Text(hint_text.c_str());
+        // ImVec2 circle_center{ImGui::GetWindowWidth() - 30.0f, ImGui::GetWindowHeight() / 2.0f};
+        // ImU32 col32 = ImColor(ImVec4(66.0f / 255.0f,  110.0f / 255.0f, 250.0f / 255.0f, 1.0f));
+        // ImGui::GetWindowDrawList()->AddCircle(circle_center, 5.0f, col32, 20);
+        ImGui::SameLine(ImGui::GetWindowWidth() - 30.0f);
+        if (ImGui::Button("X"))
+            can_show_hintBar = false;
+
         ImGui::End();
     }   
     ImGui::PopStyleColor();
     ImGui::PopStyleColor();
-    // ImGui::PopStyleVar();
-    // ImGui::PopFont();
+    ImGui::PopStyleColor();
+    ImGui::PopStyleColor();
+    ImGui::PopStyleVar();
 }
 
 void App::showColorSelector()
@@ -691,7 +708,64 @@ void App::showColorSelector()
     
 }
 
-void App::showInputWindow()
+void App::showInputWindow(int nRemains)
+{
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize;
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(25.0f / 255.0f, 25.0f / 255.0f, 25.0f / 255.0f, 0.8f));
+    // ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(36.0f / 255.0f, 36.0f / 255.0f, 36.0f / 255.0f, 0.8f))
+
+    if (ImGui::Begin(" ", nullptr, window_flags))
+    {
+        ImGui::SetWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x / 2.0f - ImGui::GetWindowWidth() / 2.0f, 80.0f));
+
+        std::string message = curr_oper + " remaining polygons: " + std::to_string(nRemains);
+        message += ". Please enter how many steps you want to operate.";
+        ImGui::Text(message.c_str());
+        ImGui::Separator();
+
+        bool reclaim_focus = false;
+        ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue;
+        if (ImGui::InputText("Input", InputBuf, IM_ARRAYSIZE(InputBuf), input_text_flags))
+        {
+            char* s = InputBuf;
+            Strtrim(s);
+            if (s[0]) 
+            {
+                ExecCommand(s);
+                can_show_inputWindow = false;
+            }
+                
+            strcpy(s, "");
+            reclaim_focus = true;
+        }
+
+        // Auto-focus on window apparition
+        ImGui::SetItemDefaultFocus();
+        if (reclaim_focus)
+            ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
+
+        if (!ImGui::IsWindowFocused())
+            can_show_inputWindow = false;
+        
+        ImGui::End();
+    }
+    ImGui::PopStyleColor();
+}
+
+void App::ExecCommand(const char* command_line)
 {
 
+    if (Stricmp(command_line, "skip") == 0) 
+    {
+        is_step_by_step = false;
+        can_start_step = true;
+    }
+    else
+    {
+        step_cnt = atoi(command_line);
+        if (step_cnt > 0)
+            can_start_step = true;
+        else 
+            step_cnt = 0;
+    }
 }

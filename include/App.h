@@ -75,6 +75,12 @@ private:
 
     void showHintBar();
     void showBottomBar();
-    void showInputWindow();
+
+    void showInputWindow(int nRemains);
+    char InputBuf[256];
+    static int   Stricmp(const char* s1, const char* s2)         { int d; while ((d = toupper(*s2) - toupper(*s1)) == 0 && *s1) { s1++; s2++; } return d; }
+    static void  Strtrim(char* s)                                { char* str_end = s + strlen(s); while (str_end > s && str_end[-1] == ' ') str_end--; *str_end = 0; }
+    void ExecCommand(const char* command_line);
+
     void showColorSelector();
 };

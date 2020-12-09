@@ -41,6 +41,7 @@ private:
     //     Polygon_Holes polygon;
     //     bool has_hole = false;
     // };
+    int nRemains{};
     std::ifstream input_file;
     std::ofstream output_file;
     std::string input_file_path;

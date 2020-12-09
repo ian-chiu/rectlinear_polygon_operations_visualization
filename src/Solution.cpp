@@ -128,7 +128,7 @@ void Solution::execute_and_render_operations(App &app)
             }
             if (line.rfind(app.curr_oper) != std::string::npos)
             {
-                int nRemains = find_remain_polygons(line_cnt);
+                nRemains = find_remain_polygons(line_cnt);
                 while (getline(input_file, line) && nRemains > 0)
                 {
                     line_cnt++;
@@ -239,6 +239,7 @@ void Solution::execute_and_render_operations(App &app)
     }
     this->execute_split();
     app.curr_oper = app.all_operations.back();
+    app.hint_text = "All operations are done. The output result is in data/output.txt.";
     // app.focusPoint = app.plotPos((rangeBox.right + rangeBox.left)/2.0f, (rangeBox.top + rangeBox.bottom)/2.0f);
     app.isAllDone = true;
 }
