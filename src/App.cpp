@@ -37,8 +37,13 @@ App::App(int w, int h)
     ImGuiStyle& style = ImGui::GetStyle();
     // style.FramePadding      =   ImVec2( 5.0f, 5.0f );
     style.WindowRounding    =   0.0f;
-    style.Colors[ImGuiCol_WindowBg]     =   ImVec4(36.0f / 255.0f, 36.0f / 255.0f, 36.0f / 255.0f, 1.0f);
-    style.Colors[ImGuiCol_Border]       =   ImVec4(1.0f, 1.0f, 1.0f, 0.0f);
+    style.Colors[ImGuiCol_WindowBg]              =   ImVec4(20.0f / 255.0f, 20.0f / 255.0f, 20.0f / 255.0f, 0.8f);
+    style.Colors[ImGuiCol_Border]                =   ImVec4(1.0f, 1.0f, 1.0f, 0.0f);
+    style.Colors[ImGuiCol_Button]                =   ImVec4(1.0f, 1.0f, 1.0f, 0.0f);
+    style.Colors[ImGuiCol_ButtonHovered]         =   ImVec4(40.0f / 255.0f, 40.0f / 255.0f, 40.0f / 255.0f, 1.0f);
+    style.Colors[ImGuiCol_ButtonActive]          =   ImVec4(20.0f / 255.0f, 20.0f / 255.0f, 20.0f / 255.0f, 1.0f);
+    style.Colors[ImGuiCol_FrameBg]               =   ImVec4(25.0f / 255.0f, 25.0f / 255.0f, 25.0f / 255.0f, 0.8f);
+    style.Colors[ImGuiCol_TitleBgActive]         =   ImVec4(36.0f / 255.0f, 36.0f / 255.0f, 36.0f / 255.0f, 0.8f);
 
     memset(InputBuf, 0, sizeof(InputBuf));
 
@@ -46,180 +51,6 @@ App::App(int w, int h)
     window.setView(camera);
     lines.reserve(100000);
 }
-
-// ------------------App Console--------------------
-// struct App::AppConsole
-// {
-//     char                  InputBuf[256];
-//     App                   *connect_app = nullptr;
-
-//     AppConsole(App *app = nullptr) : connect_app(app)
-//     {
-//         memset(InputBuf, 0, sizeof(InputBuf));
-//     }
-
-//     // Portable helpers
-//     static int   Stricmp(const char* s1, const char* s2)         { int d; while ((d = toupper(*s2) - toupper(*s1)) == 0 && *s1) { s1++; s2++; } return d; }
-//     static void  Strtrim(char* s)                                { char* str_end = s + strlen(s); while (str_end > s && str_end[-1] == ' ') str_end--; *str_end = 0; }
-
-//     void Draw(const char* title, bool* p_open)
-//     {
-//         // ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
-//         ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0]);
-//         if (!ImGui::Begin(title, p_open, ImGuiWindowFlags_AlwaysAutoResize))
-//         {
-//             ImGui::End();
-//             return;
-//         }
-//         ImGui::PopFont();
-
-//         // As a specific feature guaranteed by the library, after calling Begin() the last Item represent the title bar.
-//         // So e.g. IsItemHovered() will return true when hovering the title bar.
-//         // Here we create a context menu only available from the title bar.
-//         if (ImGui::BeginPopupContextItem())
-//         {
-//             if (ImGui::MenuItem("Close Console"))
-//                 *p_open = false;
-//             ImGui::EndPopup();
-//         }
-
-
-//         ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
-
-//         sf::Vector2i pixelPos = sf::Mouse::getPosition(connect_app->window);
-//         sf::Vector2f worldPos = connect_app->window.mapPixelToCoords(pixelPos);
-
-//         sf::Vector2f mousePlotPos = connect_app->plotPos(worldPos.x, worldPos.y);
-//         ImGui::Text("Mouse Position: (%.1f,%.1f)", mousePlotPos.x, mousePlotPos.y);
-//         ImGui::Separator();
-
-//         ImGui::Text("World Scale: %.1f %%", connect_app->worldScale * 100.0f);
-//         ImGui::Separator();
-
-//         ImGui::Text("Camera Center: (%.1f,%.1f)", connect_app->camera.getCenter().x, connect_app->win_height - connect_app->camera.getCenter().y);
-//         ImGui::Separator();
-
-//         ImGui::Text("Operation Order: ");
-//         for (const auto &oper_str : connect_app->all_operations) 
-//         {
-//             if (oper_str == connect_app->curr_oper)
-//             {
-//                 ImGui::SameLine();
-//                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.4f, 0.4f, 1.0f));
-//                 ImGui::Text((oper_str + " ").c_str());
-//                 ImGui::PopStyleColor();
-//                 ImGui::SameLine();
-//             }
-//             else
-//             {
-//                 ImGui::SameLine();
-//                 ImGui::Text((oper_str + " ").c_str());
-//             }
-//         }
-            
-//         ImGui::Separator();
-
-//         if (!connect_app->isAllDone)
-//         {
-//             ImGui::TextWrapped( connect_app->hint_text.c_str() );
-//             // ImGui::Separator();
-//             // ImGui::Text(
-//             //     "commands:\n"
-//             //     "\tskip - skip to the end of the operation\n"
-//             //     "\t[:digit:] - execute specific numbers of steps\n"
-//             // );
-//         }
-//         else
-//         {
-//             ImGui::Text( "All operations are done.\nThe output result is in data/output.txt.\n" );
-//             // ImGui::Separator();
-//             // ImGui::Text(
-//             //     "Press S to change to split mode\n"
-//             //     "Press esc to change to non-split mode"
-//             // );
-//         }
-
-//         if (!connect_app->isAllDone) 
-//         {
-//             // ImGui::Separator();
-
-//             // Command-line
-//             bool reclaim_focus = false;
-//             ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue;
-//             if (ImGui::InputText("Input", InputBuf, IM_ARRAYSIZE(InputBuf), input_text_flags))
-//             {
-//                 char* s = InputBuf;
-//                 Strtrim(s);
-//                 if (s[0])
-//                     ExecCommand(s);
-//                 strcpy(s, "");
-//                 reclaim_focus = true;
-//             }
-
-//             // Auto-focus on window apparition
-//             ImGui::SetItemDefaultFocus();
-//             if (reclaim_focus)
-//                 ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
-//         }
-//         ImGui::PopFont();
-
-//         ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0]);
-//         if (ImGui::CollapsingHeader("Color Selector"))
-//         {
-//             if (ImGui::ColorEdit3("Background color", connect_app->bg_rbg)) 
-//             {
-//                 connect_app->bgColor.r = static_cast<sf::Uint8>(connect_app->bg_rbg[0] * 255.0f);
-//                 connect_app->bgColor.g = static_cast<sf::Uint8>(connect_app->bg_rbg[1] * 255.0f);
-//                 connect_app->bgColor.b = static_cast<sf::Uint8>(connect_app->bg_rbg[2] * 255.0f);
-//             }
-//             if (ImGui::ColorEdit3("Board color", connect_app->board_rbg)) 
-//             {
-//                 connect_app->boardColor.r = static_cast<sf::Uint8>(connect_app->board_rbg[0] * 255.0f);
-//                 connect_app->boardColor.g = static_cast<sf::Uint8>(connect_app->board_rbg[1] * 255.0f);
-//                 connect_app->boardColor.b = static_cast<sf::Uint8>(connect_app->board_rbg[2] * 255.0f);
-//             }
-//             if (!connect_app->isAllDone)
-//             {
-//                 if (ImGui::ColorEdit3("Operation color", connect_app->oper_rbg)) 
-//                 {
-//                     connect_app->operColor.r = static_cast<sf::Uint8>(connect_app->oper_rbg[0] * 255.0f);
-//                     connect_app->operColor.g = static_cast<sf::Uint8>(connect_app->oper_rbg[1] * 255.0f);
-//                     connect_app->operColor.b = static_cast<sf::Uint8>(connect_app->oper_rbg[2] * 255.0f);
-//                     // connect_app->boardColor.a = 150;
-//                 }
-//             }
-//         }
-//         ImGui::PopFont();
-//         ImGui::End();
-//     }
-
-//     void ExecCommand(const char* command_line)
-//     {
-//         if (!connect_app->isAllDone)
-//         {
-//             if (Stricmp(command_line, "skip") == 0) 
-//             {
-//                 connect_app->is_step_by_step = false;
-//                 connect_app->can_start_step = true;
-//             }
-//             else
-//             {
-//                 connect_app->step_cnt = atoi(command_line);
-//                 if (connect_app->step_cnt > 0)
-//                     connect_app->can_start_step = true;
-//                 else 
-//                     connect_app->step_cnt = 0;
-//             }
-//         }
-//         else
-//         {
-//             if (Stricmp(command_line, "split") == 0) 
-//                 connect_app->split_mode = true;
-//             else if (Stricmp(command_line, "non-split") == 0)
-//                 connect_app->split_mode = false;
-//         }
-//     }
-// };
 
 void App::render(const Solution &sol, bool can_draw_shapes)
 {
@@ -293,14 +124,16 @@ void App::render(const Solution &sol, bool can_draw_shapes)
                 break;
             }   
         }
-        // TODO: if we click in the console window the camera will also move
         // else if (event.type == sf::Event::MouseButtonPressed)
         // {
-        //     sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-        //     sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-        //     sf::Vector2f mousePlotPos = plotPos(worldPos);
-        //     camera.setCenter(mousePlotPos);
-        //     window.setView(camera);
+        //     if (event.mouseButton.button == sf::Mouse::Left && !ImGui::IsAnyWindowFocused())
+        //     {
+        //         sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+        //         sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+        //         sf::Vector2f mousePlotPos = plotPos(worldPos);
+        //         camera.setCenter(mousePlotPos);
+        //         window.setView(camera);
+        //     }
         // }
     }
 
@@ -337,21 +170,7 @@ void App::render(const Solution &sol, bool can_draw_shapes)
         window.setView(camera);
     }
 
-    // if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && !ImGui::IsAnyWindowFocused())
-    // {
-    //     sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-    //     sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-    //     sf::Vector2f mousePlotPos = plotPos(worldPos);
-    //     camera.setCenter(mousePlotPos);
-    //     window.setView(camera);
-    // }
-
-    
-
     ImGui::SFML::Update(window, deltaClock.restart());
-    // static AppConsole console(this);
-
-    // console.Draw("Control Panel", (bool *)0);
 
     ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[2]);
 
@@ -567,14 +386,12 @@ bool App::polygon_noHoles_has_hole(const Polygon_NoHoles &poly)
 
 void App::showMemuBar()
 {
-    // ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[2]);
     
     if (ImGui::BeginMainMenuBar())
     {
         memuBarHeight = ImGui::GetWindowHeight();
         if (ImGui::BeginMenu("File"))
         {
-            // ShowExampleMenuFile();
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Tools"))
@@ -585,97 +402,100 @@ void App::showMemuBar()
         }
         ImGui::EndMainMenuBar();
     }
-    // ImGui::PopFont();
 }
 
 void App::showBottomBar()
 {
+    static sf::Vector2f last_mouse_pos, last_camera_center;
+    static float last_world_scale;
+
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar;
     ImGui::SetNextWindowPos(ImVec2(0.0f, ImGui::GetIO().DisplaySize.y), 0, ImVec2(0.0f, 1.0f));
-    // ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[2]);
-    // ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0);
-    // ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(10.0f, 10.0f));
-    // ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, 2.0f);
-    // ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
-    // ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(20.0f / 255.0f, 20.0f / 255.0f, 20.0f / 255.0f, 1.0f));
+
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(36.0f / 255.0f, 36.0f / 255.0f, 36.0f / 255.0f, 1.0f));
+    if (step_cnt > 0)  ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(80.0f / 255.0f, 80.0f / 255.0f, 80.0f / 255.0f, 1.0f));
+
     if (ImGui::Begin("test", (bool *)0, window_flags))
     {
         ImGui::SetWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, 0.0f));
-        // ImGui::Columns(4, "mycolumns"); // 4-ways, with border
-        sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-        sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
 
-        sf::Vector2f mousePlotPos = plotPos(worldPos.x, worldPos.y);
-        ImGui::Text("Mouse Position: (%.1f,%.1f)\t", mousePlotPos.x, mousePlotPos.y);
-        // ImGui::NextColumn();
-        ImGui::SameLine();
-
-        ImGui::Text("World Scale: %.1f %%\t", worldScale * 100.0f);
-        // ImGui::NextColumn();
-        ImGui::SameLine();
-
-        ImGui::Text("Camera Center: (%.1f,%.1f)\t", camera.getCenter().x, win_height - camera.getCenter().y);
-        // ImGui::NextColumn();
-        ImGui::SameLine();
-
-        ImGui::Text("Operation Order: ");
-        for (const auto &oper_str : all_operations) 
+        if (step_cnt <= 0)
         {
-            if (oper_str == curr_oper)
+            sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+            sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+            sf::Vector2f mousePlotPos = plotPos(worldPos.x, worldPos.y);
+            last_mouse_pos = mousePlotPos;
+            ImGui::Text("Mouse Position: (%.1f,%.1f)\t", mousePlotPos.x, mousePlotPos.y);
+            ImGui::SameLine();
+
+            last_world_scale = worldScale * 100.0f;
+            ImGui::Text("World Scale: %.1f %%\t", worldScale * 100.0f);
+            ImGui::SameLine();
+
+            last_camera_center = camera.getCenter();
+            ImGui::Text("Camera Center: (%.1f,%.1f)\t", last_camera_center.x, win_height - last_camera_center.y);
+            ImGui::SameLine();
+
+            ImGui::Text("Operation Order: ");
+            for (const auto &oper_str : all_operations) 
             {
-                ImGui::SameLine();
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.4f, 0.4f, 1.0f));
-                ImGui::Text((oper_str + " ").c_str());
-                ImGui::PopStyleColor();
-                ImGui::SameLine();
+                if (oper_str == curr_oper)
+                {
+                    ImGui::SameLine();
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.4f, 0.4f, 1.0f));
+                    ImGui::Text((oper_str + " ").c_str());
+                    ImGui::PopStyleColor();
+                    ImGui::SameLine();
+                }
+                else
+                {
+                    ImGui::SameLine();
+                    ImGui::Text((oper_str + " ").c_str());
+                }
             }
-            else
+        }
+        else
+        {
+            ImGui::Text("Mouse Position: (%.1f,%.1f)\t", last_mouse_pos.x, last_mouse_pos.y);
+            ImGui::SameLine();
+
+            ImGui::Text("World Scale: %.1f %%\t", last_world_scale * 100.0f);
+            ImGui::SameLine();
+
+            ImGui::Text("Camera Center: (%.1f,%.1f)\t", last_camera_center.x, win_height - last_camera_center.y);
+            ImGui::SameLine();
+
+            ImGui::Text("Operation Order: ");
+            for (const auto &oper_str : all_operations) 
             {
                 ImGui::SameLine();
                 ImGui::Text((oper_str + " ").c_str());
             }
         }
-        // ImGui::NextColumn();
         ImGui::End();
     }   
-    // ImGui::PopStyleColor();
-    // ImGui::PopStyleVar();
-    // ImGui::PopFont();
+
+    ImGui::PopStyleColor();
+
+    if (step_cnt > 0)  
+        ImGui::PopStyleColor();
 }
 
 void App::showHintBar()
 {
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar;
     ImGui::SetNextWindowPos(ImVec2(0.0f, memuBarHeight), 0, ImVec2(0.0f, 0.0f));
-    // ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[2]);
-    // ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0);
-    
-    // ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImVec4(25.0f / 255.0f, 25.0f / 255.0f, 25.0f / 255.0f, 1.0f));
-    // ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-    // ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(255.0f / 255.0f, 20.0f / 255.0f, 20.0f / 255.0f, 1.0f));
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2.0f, 2.0f));
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(20.0f / 255.0f, 20.0f / 255.0f, 20.0f / 255.0f, 0.8f));
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(40.0f / 255.0f, 40.0f / 255.0f, 40.0f / 255.0f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(20.0f / 255.0f, 20.0f / 255.0f, 20.0f / 255.0f, 1.0f));
+
     if (ImGui::Begin("Hint", &can_show_hintBar, window_flags))
     {
         ImGui::SetWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, 0.0f));
         ImGui::Text(hint_text.c_str());
-        // ImVec2 circle_center{ImGui::GetWindowWidth() - 30.0f, ImGui::GetWindowHeight() / 2.0f};
-        // ImU32 col32 = ImColor(ImVec4(66.0f / 255.0f,  110.0f / 255.0f, 250.0f / 255.0f, 1.0f));
-        // ImGui::GetWindowDrawList()->AddCircle(circle_center, 5.0f, col32, 20);
         ImGui::SameLine(ImGui::GetWindowWidth() - 30.0f);
         if (ImGui::Button("X"))
             can_show_hintBar = false;
 
         ImGui::End();
-    }   
-    ImGui::PopStyleColor();
-    ImGui::PopStyleColor();
-    ImGui::PopStyleColor();
-    ImGui::PopStyleColor();
-    ImGui::PopStyleVar();
+    }  
 }
 
 void App::showColorSelector()
@@ -711,8 +531,7 @@ void App::showColorSelector()
 void App::showInputWindow(int nRemains)
 {
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize;
-    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(25.0f / 255.0f, 25.0f / 255.0f, 25.0f / 255.0f, 0.8f));
-    // ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(36.0f / 255.0f, 36.0f / 255.0f, 36.0f / 255.0f, 0.8f))
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(36.0f / 255.0f, 36.0f / 255.0f, 36.0f / 255.0f, 0.8f));
 
     if (ImGui::Begin(" ", nullptr, window_flags))
     {
@@ -723,7 +542,6 @@ void App::showInputWindow(int nRemains)
         ImGui::Text(message.c_str());
         ImGui::Separator();
 
-        bool reclaim_focus = false;
         ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue;
         if (ImGui::InputText("Input", InputBuf, IM_ARRAYSIZE(InputBuf), input_text_flags))
         {
@@ -736,13 +554,11 @@ void App::showInputWindow(int nRemains)
             }
                 
             strcpy(s, "");
-            reclaim_focus = true;
         }
 
         // Auto-focus on window apparition
         ImGui::SetItemDefaultFocus();
-        if (reclaim_focus)
-            ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
+        ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
 
         if (!ImGui::IsWindowFocused())
             can_show_inputWindow = false;

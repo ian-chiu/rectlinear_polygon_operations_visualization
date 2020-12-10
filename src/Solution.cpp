@@ -171,21 +171,21 @@ void Solution::execute_and_render_operations(App &app)
                         std::string message;
                         // message += "Current Operation: ";
                         // message += (app.curr_oper[0] == 'M') ? "MERGE " : "CLIP ";
-                        message += app.curr_oper + " ";
-                        message += "Current Task (at line " + std::to_string(line_cnt) + "): ";
-                        message += line;
-                        message += " (remain " + std::to_string(nRemains) + " polygons that need to operate...)";
-                        app.hint_text = message;
+                        if (app.step_cnt == 0)
+                        {
+                            message += app.curr_oper + " ";
+                            message += "Current Task (at line " + std::to_string(line_cnt) + "): ";
+                            message += line;
+                            message += " (remaining " + std::to_string(nRemains) + " polygons...)";
+                            app.hint_text = message;
+                        }
+                        else
+                        {
+                            app.hint_text = app.curr_oper + " processing... (Remaining polygons: " + std::to_string(nRemains) + ")";
+                        }
+                        
+                        
 
-                        // sf::Vector2f worldPos = app.plotPos(pts[0].x(), pts[0].y());
-                        // sf::Vector2i pixelPos = app.window.mapCoordsToPixel(worldPos);
-                        // while (pixelPos.x >= 500.0f)
-                        // {
-                        //     app.camera.zoom(1.05);
-                        //     app.window.setView(app.camera);
-                        //     pixelPos = app.window.mapCoordsToPixel(worldPos);
-                        // }
-                        // app.camera.zoom(std::abs(pts[1].x() - pts[0].x()) / 100);
                         Point boundary_center;
                         gtl::center(boundary_center, polygon);
                         app.focusPoint = app.plotPos(boundary_center.x(), boundary_center.y());
