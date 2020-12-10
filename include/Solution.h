@@ -3,15 +3,10 @@
 #include "App.fwd.h"
 #include "Solution.fwd.h"
 
-#include <string>
 #include <fstream>
-#include <sstream>
-#include <stdexcept>
 #include <string>
-#include <future>
 #include <vector>
 #include "App.h"
-#include "PolygonSetHelper.h"
 #include "gtl_poly_types.h"
 
 class Solution
@@ -31,16 +26,6 @@ public:
     std::string get_split_method() const;
 
 private:
-    // class Polygon : public Polygon_Holes
-    // {
-    // public:
-    //     bool input_polygon_has_hole = false;
-    // };
-    // struct Polygon
-    // {
-    //     Polygon_Holes polygon;
-    //     bool has_hole = false;
-    // };
     int nRemains{};
     std::ifstream input_file;
     std::ofstream output_file;

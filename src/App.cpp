@@ -522,10 +522,8 @@ void App::showInputWindow(int nRemains)
 
 void App::ExecCommand(const char* command_line)
 {
-
     if (Stricmp(command_line, "skip") == 0) 
     {
-        is_step_by_step = false;
         can_start_step = true;
     }
     else

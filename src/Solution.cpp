@@ -1,15 +1,9 @@
 #include "Solution.h"
+
+#include <sstream>
 #include <limits>
 #include <algorithm>
 using namespace gtl::operators;
-struct RangeBox
-{
-    int left{};
-    int right{};
-    int bottom{};
-    int top{};
-    bool is_initialize = false;
-};
 
 Solution::Solution(std::string infile, std::string outfile) 
     : input_file(infile), output_file(outfile), input_file_path(infile)
@@ -47,71 +41,10 @@ std::vector<std::string> Solution::copy_operations() const
     return std::vector<std::string>(operations);
 }
 
-// void process_polygon(PolygonSet &ps, const Polygon_Holes &polygon)
-// {
-//     auto pt1 = polygon.begin();
-//     auto pt2 = polygon.begin();
-//     for (; pt1 != polygon.end(); pt1++)
-//     {
-//         for (; pt2 != polygon.end(); pt2++)
-//         {
-//             if (pt1 != pt2 && *pt1 == *pt2)
-//             {
-//                 break;
-//             }
-//         }
-//     }
-//     std::vector<Point> pts{};
-    
-//     bool has_hole = pt1 != polygon.begin() && pt2 != polygon.begin();
-//     if (has_hole)
-//     {
-//         Polygon_Holes hole_polygon;
-//         for (auto vertex = pt1; vertex != pt2; vertex++)
-//         {
-//             pts.push_back(*vertex);
-//         }
-//         pts.pop_back();
-//         gtl::set_points(hole_polygon, pts.begin(), pts.end());
-//         ps -= hole_polygon;
-//         pts.clear();
-//     }
-
-//     Polygon_Holes outer_polygon;
-//     for (auto vertex = polygon.begin(); vertex != pt1; vertex++)
-//     {
-//         pts.push_back(*vertex);
-//     }
-//     for (auto vertex = pt2; vertex != polygon.end(); vertex++)
-//     {
-//         pts.push_back(*vertex);
-//     }
-//     pts.pop_back();
-//     gtl::set_points(outer_polygon, pts.begin(), pts.end());
-//     ps += outer_polygon;
-// }
-
-// bool input_polygon_has_hole(const std::vector<Point> &pts)
-// {
-//     if (pts.size() < 8)
-//         return false;
-
-//     for (int i = 0; i < pts.size(); i++)
-//     {
-//         for (int j = 0; j < pts.size(); j++)
-//         {
-//             if (i != j && pts[i] == pts[j])
-//                 return true;
-//         }
-//     }
-//     return false;
-// }
-
 void Solution::execute_and_render_operations(App &app)
 {
     std::string token;
     std::istringstream iss;
-    RangeBox rangeBox;
     while (!app.operations_queue.empty() && app.window.isOpen())
     {
         app.pop_operations_queue();
@@ -141,25 +74,14 @@ void Solution::execute_and_render_operations(App &app)
                     }
                     if (token == "POLYGON")
                     {
-                        // TODO: fix the hole error
                         Polygon_Holes polygon;
                         std::vector<Point> pts{};
                         pts.reserve(10);
 
                         int x{}, y{};
-                        // int min_x{-1}, max_x{-1}, min_y{-1}, max_y{-1};
                         while (iss >> x)
                         {
                             iss >> y;
-                            // if (max_x == -1)    max_x = x;
-                            // if (min_x == -1)    min_x = x;
-                            // if (min_y == -1)    min_y = y;
-                            // if (max_y == -1)    max_y = y;
-                            // if (x < min_x)      min_x = x;
-                            // if (x > max_x)      max_x = x;
-                            // if (y < min_y)      min_y = y;
-                            // if (y > max_y)      max_y = y;
-
                             pts.push_back(gtl::construct<Point>(x, y));
                         }
                         pts.pop_back();
@@ -169,8 +91,6 @@ void Solution::execute_and_render_operations(App &app)
                         nRemains--;
 
                         std::string message;
-                        // message += "Current Operation: ";
-                        // message += (app.curr_oper[0] == 'M') ? "MERGE " : "CLIP ";
                         if (app.step_cnt == 0)
                         {
                             message += app.curr_oper + " ";
@@ -195,17 +115,8 @@ void Solution::execute_and_render_operations(App &app)
                             app.window.setView(app.camera);
                         }
 
-                        // if (!rangeBox.is_initialize)
-                        // {
-                        //     rangeBox = {min_x, max_x, min_y, max_y, true};
-                        // }
-                        // if (min_x < rangeBox.left)      rangeBox.left = min_x;
-                        // if (max_y > rangeBox.top)       rangeBox.top = max_y;
-                        // if (max_x > rangeBox.right)     rangeBox.right = max_x;
-                        // if (min_y < rangeBox.bottom)   rangeBox.bottom = min_y;   
-
                         // ---------render and execute operation on polygon set----------
-                        if (app.is_step_by_step && app.step_cnt == 0)
+                        if (app.step_cnt == 0)
                         {
                             polygon_set.push_back(polygon);
                             while(!app.can_start_step && app.window.isOpen()) 
@@ -229,9 +140,7 @@ void Solution::execute_and_render_operations(App &app)
                             app.is_start_first_oper = true;
                     }
                 }
-                // app.hint_text = app.curr_oper + " is Done\n";
                 app.render(*this);
-                app.is_step_by_step = true;
                 app.step_cnt = 0;
                 break;
             }
@@ -240,7 +149,6 @@ void Solution::execute_and_render_operations(App &app)
     execute_split();
     app.curr_oper = app.all_operations.back();
     app.hint_text = "All operations are done. The output result is in data/output.txt.";
-    // app.focusPoint = app.plotPos((rangeBox.right + rangeBox.left)/2.0f, (rangeBox.top + rangeBox.bottom)/2.0f);
     app.isAllDone = true;
 }
 

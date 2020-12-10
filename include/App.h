@@ -27,7 +27,6 @@ public:
     bool can_start_step = false;
     std::string hint_text;
     bool split_mode{ false };
-    bool is_step_by_step{ true };
     void set_operations(const Solution &sol);
     void pop_operations_queue();
 
