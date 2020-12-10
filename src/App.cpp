@@ -1,5 +1,4 @@
 #include "App.h"
-#include <Thor/Shapes/ConcaveShape.hpp>
 #include <stdexcept>
 #include <future>
 
@@ -37,11 +36,15 @@ App::App(int w, int h)
     ImGuiStyle& style = ImGui::GetStyle();
     // style.FramePadding      =   ImVec2( 5.0f, 5.0f );
     style.WindowRounding    =   0.0f;
+    style.WindowMinSize     =   ImVec2(1.0f, 1.0f);
     style.Colors[ImGuiCol_WindowBg]              =   ImVec4(20.0f / 255.0f, 20.0f / 255.0f, 20.0f / 255.0f, 0.8f);
     style.Colors[ImGuiCol_Border]                =   ImVec4(1.0f, 1.0f, 1.0f, 0.0f);
     style.Colors[ImGuiCol_Button]                =   ImVec4(1.0f, 1.0f, 1.0f, 0.0f);
-    style.Colors[ImGuiCol_ButtonHovered]         =   ImVec4(40.0f / 255.0f, 40.0f / 255.0f, 40.0f / 255.0f, 1.0f);
-    style.Colors[ImGuiCol_ButtonActive]          =   ImVec4(20.0f / 255.0f, 20.0f / 255.0f, 20.0f / 255.0f, 1.0f);
+    style.Colors[ImGuiCol_ButtonHovered]         =   ImVec4(100.0f / 255.0f, 100.0f / 255.0f, 100.0f / 255.0f, 1.0f);
+    style.Colors[ImGuiCol_ButtonActive]          =   ImVec4(10.0f / 255.0f, 10.0f / 255.0f, 10.0f / 255.0f, 1.0f);
+    style.Colors[ImGuiCol_ResizeGrip]            =   ImVec4(50.0f / 255.0f, 50.0f / 255.0f, 50.0f / 255.0f, 1.0f);
+    style.Colors[ImGuiCol_ResizeGripHovered]     =   ImVec4(100.0f / 255.0f, 100.0f / 255.0f, 100.0f / 255.0f, 1.0f);
+    style.Colors[ImGuiCol_ResizeGripActive]      =   ImVec4(30.0f / 255.0f, 30.0f / 255.0f, 30.0f / 255.0f, 1.0f);
     style.Colors[ImGuiCol_FrameBg]               =   ImVec4(25.0f / 255.0f, 25.0f / 255.0f, 25.0f / 255.0f, 0.8f);
     style.Colors[ImGuiCol_TitleBgActive]         =   ImVec4(36.0f / 255.0f, 36.0f / 255.0f, 36.0f / 255.0f, 0.8f);
 
@@ -347,15 +350,21 @@ void App::showBottomBar()
     static sf::Vector2f last_mouse_pos, last_camera_center;
     static float last_world_scale;
 
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar;
+    ImGuiWindowFlags window_flags = 
+        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | 
+        ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse | 
+        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar;
+
     ImGui::SetNextWindowPos(ImVec2(0.0f, ImGui::GetIO().DisplaySize.y), 0, ImVec2(0.0f, 1.0f));
 
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.0f, 1.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10.0f, 3.0f));
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(36.0f / 255.0f, 36.0f / 255.0f, 36.0f / 255.0f, 1.0f));
     if (step_cnt > 0)  ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(80.0f / 255.0f, 80.0f / 255.0f, 80.0f / 255.0f, 1.0f));
 
     if (ImGui::Begin("test", (bool *)0, window_flags))
     {
-        ImGui::SetWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, 0.0f));
+        ImGui::SetWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, 20.0f));
 
         if (step_cnt <= 0)
         {
@@ -412,23 +421,27 @@ void App::showBottomBar()
         }
         ImGui::End();
     }   
-
+    ImGui::PopStyleVar();
+    ImGui::PopStyleVar();
     ImGui::PopStyleColor();
-
     if (step_cnt > 0)  
         ImGui::PopStyleColor();
 }
 
 void App::showHintBar()
 {
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar;
+    ImGuiWindowFlags window_flags = 
+        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | 
+        ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse | 
+        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar;
+
     ImGui::SetNextWindowPos(ImVec2(0.0f, memuBarHeight), 0, ImVec2(0.0f, 0.0f));
 
     if (ImGui::Begin("Hint", &can_show_hintBar, window_flags))
     {
-        ImGui::SetWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, 0.0f));
+        ImGui::SetWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, 30.0f));
         ImGui::Text(hint_text.c_str());
-        ImGui::SameLine(ImGui::GetWindowWidth() - 30.0f);
+        ImGui::SameLine(ImGui::GetWindowWidth() - 25.0f);
         if (ImGui::Button("X"))
             can_show_hintBar = false;
 
@@ -438,6 +451,7 @@ void App::showHintBar()
 
 void App::showColorSelector()
 {
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_AlwaysAutoResize;
     if (ImGui::Begin("Color Selector", &can_show_colorSelector))
     {
         if (ImGui::ColorEdit3("Background color", bg_rbg)) 

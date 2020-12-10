@@ -1,7 +1,8 @@
 # A CMakeLists.txt file used to build the project along with vcpkg having downloaded 
 # the following dependencies already:
 #    - SFML 
-#    - Thor 
+#    - ImGui
+#    - ImGui-SFML
 #    - Boost.Polygon
 # (Please install dependencies above in vcpkg before building the project)
 # (Hint: You have to add "-DCMAKE_TOOLCHAIN_FILE=<your-path-to-vcpkg.cmake>" when you configure the project)
@@ -18,11 +19,6 @@ aux_source_directory(src SOURCES)
 
 find_package(SFML 2.5 COMPONENTS graphics REQUIRED)
 
-# Copy FindThor.cmake to vcpkg, and then find_package() can automatically find thor library for us
-file(COPY cmake/FindThor.cmake DESTINATION "${_VCPKG_ROOT_DIR}/packages/thor_${VCPKG_TARGET_TRIPLET}/cmake")
-list(APPEND CMAKE_MODULE_PATH "${_VCPKG_ROOT_DIR}/packages/thor_${VCPKG_TARGET_TRIPLET}/cmake")
-find_package(Thor 2.0 REQUIRED)
-
 find_package(imgui CONFIG REQUIRED)
 find_package(ImGui-SFML CONFIG REQUIRED)
 
@@ -35,7 +31,6 @@ target_include_directories(visualization
 
 target_link_libraries(visualization 
     PRIVATE sfml-graphics
-    PRIVATE ${THOR_LIBRARY}
     PRIVATE ImGui-SFML::ImGui-SFML
 )
 
