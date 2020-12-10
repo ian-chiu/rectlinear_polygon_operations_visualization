@@ -20,20 +20,15 @@ class App
 public:
     App(int win_width = 1280, int win_height = 720);
     void render(const Solution &solution, bool can_draw_shapes = true);
-
     bool isAllDone = false;
     bool can_start_step = false;
     std::string hint_text;
     bool split_mode{ false };
-    // void set_operations(const Solution &sol);
-    // void pop_operations_queue();
     bool isWindowOpen();
 
 private:
     sf::RenderWindow window;
     sf::Clock deltaClock;
-    // std::queue<std::string> operations_queue;
-    // std::vector<std::string> all_operations;
     int win_width;
     int win_height;
     sf::Font font;
@@ -44,7 +39,6 @@ private:
     float bg_rbg[3] = { 0.f, 0.f, 0.f };
     float board_rbg[3] = { 25.0f / 255.f, 68.0f / 255.f, 43.0f / 255.f };
     float oper_rbg[4] = { 246.0f / 255.f, 164.0f / 255.f, 58.0f / 255.f, 0.7f };
-    // std::string curr_oper;
 
     sf::View camera;
     sf::Vector2f focusPoint;
@@ -62,8 +56,6 @@ private:
     void draw_rects_edge(const std::vector<Rect> &rects);
     std::vector<sf::Vertex> lines;
     void draw_polygon_set(const PolygonSet &ps);
-    bool polygon_noHoles_has_hole(const Polygon_Holes &poly);
-    bool polygon_noHoles_has_hole(const Polygon_NoHoles &poly);
 
     bool can_show_hintBar = true;
     bool can_show_inputWindow = false;

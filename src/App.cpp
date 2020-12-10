@@ -5,15 +5,10 @@
 App::App(int w, int h)
    : win_width(w), win_height(h)
 {
-    if (!font.loadFromFile(CMAKE_SOURCE_DIR + "/resource/arial.ttf"))
-    {
-        throw std::runtime_error("Cannot load font!");
-    }
-
-    
     if (!texture.create(500, 500))
     {
-        throw std::runtime_error("Cannot create texture!");
+        std::cerr << "Cannot create texture!";
+        std::exit(-1);
     }
     sf::Image image;
     image.create(500, 500, sf::Color::White);
@@ -33,7 +28,6 @@ App::App(int w, int h)
     ImGui::SFML::UpdateFontTexture(); 
 
     ImGuiStyle& style = ImGui::GetStyle();
-    // style.FramePadding      =   ImVec2( 5.0f, 5.0f );
     style.WindowRounding    =   0.0f;
     style.WindowMinSize     =   ImVec2(1.0f, 1.0f);
     style.Colors[ImGuiCol_WindowBg]              =   ImVec4(20.0f / 255.0f, 20.0f / 255.0f, 20.0f / 255.0f, 0.8f);
@@ -205,23 +199,6 @@ void App::render(const Solution &sol, bool can_draw_shapes)
     window.display();
 }
 
-// void App::set_operations(const Solution &sol)
-// {
-//     for (int i = 0; i < sol.operations.size() - 1; i++)
-//         operations_queue.push(sol.operations[i]);
-    
-//     all_operations = sol.copy_operations();
-// }
-
-// void App::pop_operations_queue()
-// {
-//     if (!operations_queue.empty())
-//     {
-//         curr_oper = operations_queue.front();
-//         operations_queue.pop();
-//     }
-// }
-
 bool App::isWindowOpen()
 {
     return window.isOpen();
@@ -301,36 +278,6 @@ void App::draw_polygon_set(const PolygonSet &ps)
 
         polygon_cnt++;
     }
-}
-
-bool App::polygon_noHoles_has_hole(const Polygon_Holes &poly)
-{
-    for (auto pt1 = poly.begin(); pt1 != poly.end(); pt1++)
-    {
-        for (auto pt2 = poly.begin(); pt2 != poly.end(); pt2++)
-        {
-            if (pt1 != pt2 && *pt1 == *pt2)
-            {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-bool App::polygon_noHoles_has_hole(const Polygon_NoHoles &poly)
-{
-    for (auto pt1 = poly.begin(); pt1 != poly.end(); pt1++)
-    {
-        for (auto pt2 = poly.begin(); pt2 != poly.end(); pt2++)
-        {
-            if (pt1 != pt2 && *pt1 == *pt2)
-            {
-                return true;
-            }
-        }
-    }
-    return false;
 }
 
 void App::showMemuBar()

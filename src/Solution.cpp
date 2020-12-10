@@ -52,8 +52,10 @@ Solution::Solution(std::string infile, std::string outfile)
 {
     if (!input_file)
     {
-        throw std::runtime_error("Cannot open " + infile);
+        std::cerr << "Cannot open " + infile;
+        std::exit(-1);
     }
+    
     output_rects.reserve(10000);
 }
 
@@ -69,7 +71,8 @@ void Solution::read_operations()
     input_file >> token;
     if (token != "OPERATION")
     {
-        throw std::runtime_error("The first line of the input file must be operation list!");
+        std::cerr << "The first line of the input file must be operation list!";
+        std::exit(-1);
     }
     while (input_file >> token && token != ";")
     {
