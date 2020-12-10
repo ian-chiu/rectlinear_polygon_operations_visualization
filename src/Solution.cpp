@@ -1,9 +1,51 @@
 #include "Solution.h"
 
 #include <sstream>
+#include <future>
+#include <array>
 #include <limits>
 #include <algorithm>
 using namespace gtl::operators;
+
+template<typename R>
+bool is_ready(std::future<R> const& f)
+{ 
+    return f.wait_for(std::chrono::seconds(0)) == std::future_status::ready; 
+}
+
+struct PolygonSetHelper
+{
+    PolygonSetHelper() {
+        ps.reserve(1000);
+    }
+    std::queue<std::future<void>> futures;
+    PolygonSet ps{};
+
+    void push_future(std::future<void> &&future)
+    {
+        while (!futures.empty() && is_ready(futures.front())) {
+            futures.pop();
+        }
+        futures.push(std::move(future));
+    }
+
+    void wait_futures() 
+    {
+        while (!futures.empty()) {
+            futures.front().wait();
+            futures.pop();
+        }
+    }
+
+    void mergePolygon(Polygon_Holes polygon)
+    {
+        std::lock_guard<std::mutex> lock(m_mtx);
+        ps += polygon;
+    }
+
+private:
+    std::mutex m_mtx;
+};
 
 Solution::Solution(std::string infile, std::string outfile) 
     : input_file(infile), output_file(outfile), input_file_path(infile)
@@ -43,6 +85,10 @@ std::vector<std::string> Solution::copy_operations() const
 
 void Solution::execute_and_render_operations(App &app)
 {
+    const int psh_array_size = 50;
+    std::array<PolygonSetHelper, psh_array_size> psh_array{};
+    bool isPshArrReady = true;
+
     std::string token;
     std::istringstream iss;
     while (!app.operations_queue.empty() && app.window.isOpen())
@@ -85,7 +131,6 @@ void Solution::execute_and_render_operations(App &app)
                             pts.push_back(gtl::construct<Point>(x, y));
                         }
                         pts.pop_back();
-                        // polygon_set.operate_polygon_has_hole = input_polygon_has_hole(pts);
                         gtl::set_points(polygon, pts.begin(), pts.end());
 
                         nRemains--;
@@ -103,8 +148,6 @@ void Solution::execute_and_render_operations(App &app)
                         {
                             app.hint_text = app.curr_oper + " processing... (Remaining polygons: " + std::to_string(nRemains) + ")";
                         }
-                        
-                        
 
                         Point boundary_center;
                         gtl::center(boundary_center, polygon);
@@ -123,16 +166,30 @@ void Solution::execute_and_render_operations(App &app)
                             {
                                 app.render(*this);
                             }
+                            isPshArrReady = false;
                             app.can_start_step = false;
                             polygon_set.pop_back();
                         }
-                        
-                        if (app.curr_oper[0] == 'M') 
-                            polygon_set += polygon;
-                        if (app.curr_oper[0] == 'C')
-                            polygon_set -= polygon;
+
+                        PolygonSetHelper &curr_psh = psh_array[line_cnt % psh_array_size];
+                        curr_psh.push_future(
+                            std::async(std::launch::async, &PolygonSetHelper::mergePolygon, &curr_psh, polygon)
+                        ); 
                         if (app.step_cnt > 0)
                             app.step_cnt--;
+
+                        if ((!isPshArrReady && app.step_cnt == 0) || app.isPause == true)
+                        {
+                            for (auto &psh : psh_array) 
+                            {
+                                psh.wait_futures();
+                                app.curr_oper[0] == 'M' ? polygon_set += psh.ps : polygon_set -= psh.ps;
+                                psh.ps.clear();
+                            }
+                            app.step_cnt = 0;
+                            app.isPause = false;
+                            isPshArrReady = true;
+                        }
 
                         app.render(*this, false);
 

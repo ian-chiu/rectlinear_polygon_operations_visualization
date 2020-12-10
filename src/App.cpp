@@ -123,7 +123,7 @@ void App::render(const Solution &sol, bool can_draw_shapes)
                 break;
 
             case sf::Keyboard::Space:
-                step_cnt = 0;
+                isPause = true;
                 break;
 
             case sf::Keyboard::Escape:
@@ -144,37 +144,40 @@ void App::render(const Solution &sol, bool can_draw_shapes)
         // }
     }
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+    if (!can_show_inputWindow)
     {
-        camera.move( 0.0f, -camera_speed * ms * worldScale );
-        window.setView(camera);
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) || sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-    {
-        camera.move( 0.0f, camera_speed * ms * worldScale );
-        window.setView(camera);
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-    {
-        camera.move( -camera_speed * ms * worldScale, 0.0f );
-        window.setView(camera);
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) || sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-    {
-        camera.move( camera_speed * ms * worldScale, 0.0f );
-        window.setView(camera);
-    }
-    if (worldScale >= 0.01f && sf::Keyboard::isKeyPressed(sf::Keyboard::Add))
-    {
-        worldScale /= 1.05f;
-        camera.zoom(1.0f / 1.05f);
-        window.setView(camera);
-    }
-    if (worldScale <= 10000000.0f &&sf::Keyboard::isKeyPressed(sf::Keyboard::Subtract))
-    {
-        worldScale *= 1.05f;
-        camera.zoom(1.05f);
-        window.setView(camera);
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+        {
+            camera.move( 0.0f, -camera_speed * ms * worldScale );
+            window.setView(camera);
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) || sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+        {
+            camera.move( 0.0f, camera_speed * ms * worldScale );
+            window.setView(camera);
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+        {
+            camera.move( -camera_speed * ms * worldScale, 0.0f );
+            window.setView(camera);
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) || sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+        {
+            camera.move( camera_speed * ms * worldScale, 0.0f );
+            window.setView(camera);
+        }
+        if (worldScale >= 0.01f && sf::Keyboard::isKeyPressed(sf::Keyboard::Add))
+        {
+            worldScale /= 1.05f;
+            camera.zoom(1.0f / 1.05f);
+            window.setView(camera);
+        }
+        if (worldScale <= 10000000.0f &&sf::Keyboard::isKeyPressed(sf::Keyboard::Subtract))
+        {
+            worldScale *= 1.05f;
+            camera.zoom(1.05f);
+            window.setView(camera);
+        }
     }
 
     ImGui::SFML::Update(window, deltaClock.restart());

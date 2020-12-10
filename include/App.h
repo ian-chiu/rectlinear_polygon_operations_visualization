@@ -54,6 +54,7 @@ private:
     float worldScale = 1.0f;
 
     int step_cnt{};
+    bool isPause = false;
     bool is_start_first_oper{ true };
     sf::Vector2f plotPos(float x, float y);
     sf::Vector2f plotPos(const sf::Vector2f &pt);
