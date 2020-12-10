@@ -66,6 +66,7 @@ void App::render(const Solution &sol, bool can_draw_shapes)
         if (event.type == sf::Event::Closed)
         {
             window.close();
+            std::exit(0);
         }
         else if (event.type == sf::Event::Resized)
         {

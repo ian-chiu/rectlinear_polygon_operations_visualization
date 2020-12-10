@@ -14,9 +14,7 @@ int main()
         Solution solution(CMAKE_SOURCE_DIR + "/data/input.txt", CMAKE_SOURCE_DIR + "/data/output.txt");
         solution.read_operations();
         
-        // App app{1920, 1080};
         App app{1280, 720};
-        // app.set_operations(solution);
 
         while (app.isWindowOpen())
         {
