@@ -45,7 +45,7 @@ private:
     sf::Color operColor{ 246, 164, 58, 100 };
     float bg_rbg[3] = { 0.f, 0.f, 0.f };
     float board_rbg[3] = { 25.0f / 255.f, 68.0f / 255.f, 43.0f / 255.f };
-    float oper_rbg[3] = { 246.0f / 255.f, 164.0f / 255.f, 58.0f / 255.f };
+    float oper_rbg[4] = { 246.0f / 255.f, 164.0f / 255.f, 58.0f / 255.f, 0.7f };
     std::string curr_oper;
 
     sf::View camera;
@@ -58,8 +58,9 @@ private:
     bool is_start_first_oper{ true };
     sf::Vector2f plotPos(float x, float y);
     sf::Vector2f plotPos(const sf::Vector2f &pt);
+    sf::Vector2i plotPos(const sf::Vector2i &pt);
+    
     void draw_rectangles(const std::vector<Rect> &rects, const sf::Color &color);
-    sf::VertexArray quads;
     void draw_rects_edge(const std::vector<Rect> &rects);
     std::vector<sf::Vertex> lines;
     void draw_polygon_set(const PolygonSet &ps);

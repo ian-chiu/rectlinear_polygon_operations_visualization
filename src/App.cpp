@@ -220,7 +220,12 @@ sf::Vector2f App::plotPos(float x, float y)
 
 sf::Vector2f App::plotPos(const sf::Vector2f &pt)
 {
-    return pt;
+    return {pt.x, win_height - pt.y};
+}
+
+sf::Vector2i App::plotPos(const sf::Vector2i &pt)
+{
+    return {pt.x, win_height - pt.y};
 }
 
 void App::draw_rectangles(const std::vector<Rect> &rects, const sf::Color &color)
@@ -228,27 +233,15 @@ void App::draw_rectangles(const std::vector<Rect> &rects, const sf::Color &color
     sf::RectangleShape rectShape;
     rectShape.setTexture(&texture);
     rectShape.setFillColor(color);
-    // rectShape.setOutlineColor(sf::Color::White);
-    // rectShape.setOutlineThickness(-1.f);
+
     for (auto rect : rects)
     {
-        // sf::Vertex lb(plotPos(gtl::xl(rect), gtl::yl(rect)), boardColor);
-        // sf::Vertex rt(plotPos(gtl::xh(rect), gtl::yh(rect)), boardColor);
-        // sf::Vertex lt(plotPos(gtl::xl(rect), gtl::yh(rect)), boardColor);
-        // sf::Vertex rb(plotPos(gtl::xh(rect), gtl::yl(rect)), boardColor);
-
-        // quads.append(lb);
-        // quads.append(rt);
-        // quads.append(lt);
-        // quads.append(rb);
         float rect_width = rect.get(gtl::HORIZONTAL).high() - rect.get(gtl::HORIZONTAL).low();
         float rect_height = rect.get(gtl::VERTICAL).high() - rect.get(gtl::VERTICAL).low();
         rectShape.setSize(sf::Vector2f(rect_width, rect_height));
         rectShape.setPosition(plotPos(gtl::xl(rect), gtl::yh(rect)));
         window.draw(rectShape);
     }
-    // window.draw(quads);
-    // quads.clear();
 }
 
 void App::draw_rects_edge(const std::vector<Rect> &rects)
@@ -278,78 +271,19 @@ void App::draw_rects_edge(const std::vector<Rect> &rects)
 
 void App::draw_polygon_set(const PolygonSet &ps)
 {
+    static std::vector<Rect> rect_shapes;
+    static sf::Color shape_color;
     int polygon_cnt = 0;
-    // draw polygons
     for (const auto &poly : ps)
     {
-        bool operate_shape_has_hole = false;
-
-        // draw the outline polygon shape
-        sf::Color shape_color = boardColor;
-        if (!isAllDone && (polygon_cnt == ps.size() - 1 || !is_start_first_oper) )
+        shape_color = boardColor;
+        if (!isAllDone && polygon_cnt == ps.size() - 1 )
             shape_color = operColor;
-
-        // 1. if poly's size < 8 we know this polygon does not have holes
-        // 2. we do not have to consider the main shape (polygon_cnt == 0)
-        if (poly.size() >= 8 && (polygon_cnt == ps.size() - 1 || is_start_first_oper))
-        {
-            operate_shape_has_hole = polygon_noHoles_has_hole(poly);
-        }
-
-        if (!operate_shape_has_hole && (polygon_cnt == ps.size() - 1 || is_start_first_oper))
-        {
-            thor::ConcaveShape concave{};
-            concave.setFillColor(shape_color);
-            concave.setPointCount(poly.size());
-            int cnt = 0;
-            for (auto vertex = poly.begin(); vertex != poly.end(); vertex++)
-            {
-                concave.setPoint(cnt, plotPos(gtl::x(*vertex), gtl::y(*vertex)));
-                cnt++;
-            }
-            window.draw(concave);
-
-            // draw holes inside polygon if there are holes
-            if (poly.size_holes() != 0)
-            {
-                // concave.setOutlineColor(sf::Color::Yellow);
-                concave.setFillColor(bgColor);
-                for (auto hole = poly.begin_holes(); hole != poly.end_holes(); hole++)
-                {
-                    bool hole_shape_has_intersection = polygon_noHoles_has_hole(*hole);
-                    if (hole->size() >= 8)
-                    {
-                        operate_shape_has_hole = polygon_noHoles_has_hole(poly);
-                    }
-
-                    if (!hole_shape_has_intersection)
-                    {
-                        concave.setPointCount(hole->size());
-                        int cnt = 0;
-                        for (auto hole_vertex = hole->begin(); hole_vertex != hole->end(); hole_vertex++)
-                        {
-                            concave.setPoint(cnt, plotPos(gtl::x(*hole_vertex), gtl::y(*hole_vertex)));
-                            cnt++;
-                        }
-                        window.draw(concave);
-                    }
-                    else
-                    {
-                        std::vector<Rect> rect_shapes;
-                        gtl::get_rectangles(rect_shapes, *hole);
-                        draw_rectangles(rect_shapes, bgColor);
-                    }
-                }
-                // concave.scale(sf::Vector2f(worldScale, worldScale));
-            }
-        }
-        else
-        {   
-            std::vector<Rect> rect_shapes;
-            gtl::get_rectangles(rect_shapes, poly);
-            draw_rectangles(rect_shapes, shape_color);
-        }
         
+        gtl::get_rectangles(rect_shapes, poly);
+        draw_rectangles(rect_shapes, shape_color);
+        rect_shapes.clear();
+
         polygon_cnt++;
     }
 }

@@ -237,7 +237,7 @@ void Solution::execute_and_render_operations(App &app)
             }
         }
     }
-    this->execute_split();
+    execute_split();
     app.curr_oper = app.all_operations.back();
     app.hint_text = "All operations are done. The output result is in data/output.txt.";
     // app.focusPoint = app.plotPos((rangeBox.right + rangeBox.left)/2.0f, (rangeBox.top + rangeBox.bottom)/2.0f);
@@ -247,11 +247,11 @@ void Solution::execute_and_render_operations(App &app)
 void Solution::execute_split()
 {
     if (split_method == "SV")
-        gtl::get_rectangles(output_rects, static_cast<PolygonSet>(polygon_set));
+        gtl::get_rectangles(output_rects, polygon_set);
     else if (split_method == "SH")
-        gtl::get_rectangles(output_rects, static_cast<PolygonSet>(polygon_set), gtl::HORIZONTAL);
+        gtl::get_rectangles(output_rects, polygon_set, gtl::HORIZONTAL);
     else
-        gtl::get_max_rectangles(output_rects, static_cast<PolygonSet>(polygon_set));
+        gtl::get_max_rectangles(output_rects, polygon_set);
 
     for (auto rect : output_rects)
     {
