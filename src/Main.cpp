@@ -16,9 +16,9 @@ int main()
         
         // App app{1920, 1080};
         App app{1280, 720};
-        app.set_operations(solution);
+        // app.set_operations(solution);
 
-        while (app.window.isOpen())
+        while (app.isWindowOpen())
         {
             // ----------------EXECUTE OPERATIONS----------------
             if (!app.isAllDone)

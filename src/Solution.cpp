@@ -74,7 +74,9 @@ void Solution::read_operations()
     while (input_file >> token && token != ";")
     {
         operations.push_back(token);
+        operations_queue.push_back(token);
     }
+    operations_queue.pop_back();
     split_method = operations.back();
 }
 
@@ -91,22 +93,25 @@ void Solution::execute_and_render_operations(App &app)
 
     std::string token;
     std::istringstream iss;
-    while (!app.operations_queue.empty() && app.window.isOpen())
+    while (!operations_queue.empty() && app.isWindowOpen())
     {
-        app.pop_operations_queue();
+        curr_oper = operations_queue.front();
+        operations_queue.pop_front();
+
         input_file.clear();
         input_file.seekg(0, input_file.beg);
         std::string line;
         int line_cnt = 0;
-        while (getline(input_file, line) && app.window.isOpen())
+        while (getline(input_file, line) && app.isWindowOpen())
         {
             line_cnt++;
             if (line[0] != 'D')
             {
                 continue;
             }
-            if (line.rfind(app.curr_oper) != std::string::npos)
+            if (line.rfind(curr_oper) != std::string::npos)
             {
+                order_idx++;
                 nRemains = find_remain_polygons(line_cnt);
                 while (getline(input_file, line) && nRemains > 0)
                 {
@@ -138,7 +143,7 @@ void Solution::execute_and_render_operations(App &app)
                         std::string message;
                         if (app.step_cnt == 0)
                         {
-                            message += app.curr_oper + " ";
+                            message += curr_oper + " ";
                             message += "Current Task (at line " + std::to_string(line_cnt) + "): ";
                             message += line;
                             message += " (remaining " + std::to_string(nRemains) + " polygons...)";
@@ -146,7 +151,7 @@ void Solution::execute_and_render_operations(App &app)
                         }
                         else
                         {
-                            app.hint_text = app.curr_oper + " processing... (Remaining polygons: " + std::to_string(nRemains) + ")";
+                            app.hint_text = curr_oper + " processing... (Remaining polygons: " + std::to_string(nRemains) + ")";
                         }
 
                         Point boundary_center;
@@ -162,7 +167,7 @@ void Solution::execute_and_render_operations(App &app)
                         if (app.step_cnt == 0)
                         {
                             polygon_set.push_back(polygon);
-                            while(!app.can_start_step && app.window.isOpen()) 
+                            while(!app.can_start_step && app.isWindowOpen()) 
                             {
                                 app.render(*this);
                             }
@@ -183,7 +188,7 @@ void Solution::execute_and_render_operations(App &app)
                             for (auto &psh : psh_array) 
                             {
                                 psh.wait_futures();
-                                app.curr_oper[0] == 'M' ? polygon_set += psh.ps : polygon_set -= psh.ps;
+                                curr_oper[0] == 'M' ? polygon_set += psh.ps : polygon_set -= psh.ps;
                                 psh.ps.clear();
                             }
                             app.step_cnt = 0;
@@ -192,9 +197,6 @@ void Solution::execute_and_render_operations(App &app)
                         }
 
                         app.render(*this, false);
-
-                        if (!app.is_start_first_oper) 
-                            app.is_start_first_oper = true;
                     }
                 }
                 app.render(*this);
@@ -204,7 +206,8 @@ void Solution::execute_and_render_operations(App &app)
         }
     }
     execute_split();
-    app.curr_oper = app.all_operations.back();
+    order_idx++;
+    curr_oper = operations.back();
     app.hint_text = "All operations are done. The output result is in data/output.txt.";
     app.isAllDone = true;
 }

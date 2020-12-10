@@ -1,6 +1,5 @@
 #include "App.h"
 #include <stdexcept>
-#include <future>
 
 // contructor
 App::App(int w, int h)
@@ -187,8 +186,8 @@ void App::render(const Solution &sol, bool can_draw_shapes)
     showMemuBar();
     if (can_show_hintBar)           showHintBar();
     if (can_show_colorSelector)     showColorSelector();
-    if (can_show_inputWindow)       showInputWindow(sol.nRemains);
-    showBottomBar();
+    if (can_show_inputWindow)       showInputWindow(sol);
+    showBottomBar(sol);
 
     ImGui::PopFont();
 
@@ -205,21 +204,26 @@ void App::render(const Solution &sol, bool can_draw_shapes)
     window.display();
 }
 
-void App::set_operations(const Solution &sol)
-{
-    for (int i = 0; i < sol.operations.size() - 1; i++)
-        operations_queue.push(sol.operations[i]);
+// void App::set_operations(const Solution &sol)
+// {
+//     for (int i = 0; i < sol.operations.size() - 1; i++)
+//         operations_queue.push(sol.operations[i]);
     
-    all_operations = sol.copy_operations();
-}
+//     all_operations = sol.copy_operations();
+// }
 
-void App::pop_operations_queue()
+// void App::pop_operations_queue()
+// {
+//     if (!operations_queue.empty())
+//     {
+//         curr_oper = operations_queue.front();
+//         operations_queue.pop();
+//     }
+// }
+
+bool App::isWindowOpen()
 {
-    if (!operations_queue.empty())
-    {
-        curr_oper = operations_queue.front();
-        operations_queue.pop();
-    }
+    return window.isOpen();
 }
 
 // ----------------private methods------------------
@@ -348,7 +352,7 @@ void App::showMemuBar()
     }
 }
 
-void App::showBottomBar()
+void App::showBottomBar(const Solution &sol)
 {
     static sf::Vector2f last_mouse_pos, last_camera_center;
     static float last_world_scale;
@@ -387,9 +391,10 @@ void App::showBottomBar()
             ImGui::SameLine();
 
             ImGui::Text("Operation Order: ");
-            for (const auto &oper_str : all_operations) 
+            int oper_cnt = 0;
+            for (const auto &oper_str : sol.operations) 
             {
-                if (oper_str == curr_oper)
+                if (sol.order_idx == oper_cnt)
                 {
                     ImGui::SameLine();
                     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.4f, 0.4f, 1.0f));
@@ -402,6 +407,7 @@ void App::showBottomBar()
                     ImGui::SameLine();
                     ImGui::Text((oper_str + " ").c_str());
                 }
+                oper_cnt++;
             }
         }
         else
@@ -416,7 +422,7 @@ void App::showBottomBar()
             ImGui::SameLine();
 
             ImGui::Text("Operation Order: ");
-            for (const auto &oper_str : all_operations) 
+            for (const auto &oper_str : sol.operations) 
             {
                 ImGui::SameLine();
                 ImGui::Text((oper_str + " ").c_str());
@@ -483,7 +489,7 @@ void App::showColorSelector()
     
 }
 
-void App::showInputWindow(int nRemains)
+void App::showInputWindow(const Solution &sol)
 {
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize;
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(36.0f / 255.0f, 36.0f / 255.0f, 36.0f / 255.0f, 0.8f));
@@ -492,7 +498,7 @@ void App::showInputWindow(int nRemains)
     {
         ImGui::SetWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x / 2.0f - ImGui::GetWindowWidth() / 2.0f, 80.0f));
 
-        std::string message = curr_oper + " remaining polygons: " + std::to_string(nRemains);
+        std::string message = sol.curr_oper + " remaining polygons: " + std::to_string(sol.nRemains);
         message += ". Please enter how many steps you want to operate.";
         ImGui::Text(message.c_str());
         ImGui::Separator();

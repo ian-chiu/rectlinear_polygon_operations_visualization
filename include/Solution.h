@@ -5,6 +5,7 @@
 
 #include <fstream>
 #include <string>
+#include <list>
 #include <vector>
 #include "App.h"
 #include "gtl_poly_types.h"
@@ -27,10 +28,13 @@ public:
 
 private:
     int nRemains{};
+    std::string curr_oper;
+    int order_idx{ -1 };
     std::ifstream input_file;
     std::ofstream output_file;
     std::string input_file_path;
     std::vector<std::string> operations{};
+    std::list<std::string> operations_queue;
     std::vector<Rect> output_rects{};
     PolygonSet polygon_set{};
     std::string split_method{ "SH" };

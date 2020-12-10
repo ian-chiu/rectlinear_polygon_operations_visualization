@@ -5,7 +5,6 @@
 
 #include <vector>
 #include <queue>
-#include <future>
 
 #include <SFML/Graphics.hpp>
 #include "imgui.h"
@@ -22,19 +21,19 @@ public:
     App(int win_width = 1280, int win_height = 720);
     void render(const Solution &solution, bool can_draw_shapes = true);
 
-    sf::RenderWindow window;
     bool isAllDone = false;
     bool can_start_step = false;
     std::string hint_text;
     bool split_mode{ false };
-    void set_operations(const Solution &sol);
-    void pop_operations_queue();
+    // void set_operations(const Solution &sol);
+    // void pop_operations_queue();
+    bool isWindowOpen();
 
 private:
-    struct AppConsole;
+    sf::RenderWindow window;
     sf::Clock deltaClock;
-    std::queue<std::string> operations_queue;
-    std::vector<std::string> all_operations;
+    // std::queue<std::string> operations_queue;
+    // std::vector<std::string> all_operations;
     int win_width;
     int win_height;
     sf::Font font;
@@ -45,7 +44,7 @@ private:
     float bg_rbg[3] = { 0.f, 0.f, 0.f };
     float board_rbg[3] = { 25.0f / 255.f, 68.0f / 255.f, 43.0f / 255.f };
     float oper_rbg[4] = { 246.0f / 255.f, 164.0f / 255.f, 58.0f / 255.f, 0.7f };
-    std::string curr_oper;
+    // std::string curr_oper;
 
     sf::View camera;
     sf::Vector2f focusPoint;
@@ -55,7 +54,6 @@ private:
 
     int step_cnt{};
     bool isPause = false;
-    bool is_start_first_oper{ true };
     sf::Vector2f plotPos(float x, float y);
     sf::Vector2f plotPos(const sf::Vector2f &pt);
     sf::Vector2i plotPos(const sf::Vector2i &pt);
@@ -75,9 +73,9 @@ private:
     float memuBarHeight;
 
     void showHintBar();
-    void showBottomBar();
+    void showBottomBar(const Solution &sol);
 
-    void showInputWindow(int nRemains);
+    void showInputWindow(const Solution &sol);
     char InputBuf[256];
     static int   Stricmp(const char* s1, const char* s2)         { int d; while ((d = toupper(*s2) - toupper(*s1)) == 0 && *s1) { s1++; s2++; } return d; }
     static void  Strtrim(char* s)                                { char* str_end = s + strlen(s); while (str_end > s && str_end[-1] == ' ') str_end--; *str_end = 0; }
