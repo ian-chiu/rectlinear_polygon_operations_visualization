@@ -119,6 +119,10 @@ void App::render(const Solution &sol, bool can_draw_shapes)
                     can_show_inputWindow = true;
                 break;
 
+            case sf::Keyboard::Space:
+                step_cnt = 0;
+                break;
+
             case sf::Keyboard::Escape:
                 can_show_inputWindow = false;
                 break;
