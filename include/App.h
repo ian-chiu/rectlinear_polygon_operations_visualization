@@ -1,33 +1,30 @@
 #pragma once
 
-#include "App.fwd.h"
-#include "Solution.fwd.h"
-
 #include <vector>
 #include <queue>
 #include <string>
+#include <fstream>
 
 #include <SFML/Graphics.hpp>
 #include "nfd.h"
 #include "imgui.h"
 #include "imgui-SFML.h"
-#include "Solution.h"
 #include "cmake_variables.h"
 #include "gtl_poly_types.h"
 
 class App
 {
-    friend Solution;
-
 public:
     App(int win_width = 1280, int win_height = 720);
-    void render(Solution &solution, bool can_draw_shapes = true);
+    void render(bool can_draw_shapes = true);
+    void App::execute_and_render_operations();
     bool isAllDone = true;
     bool isImportFile = false;
     bool can_start_step = false;
     std::string hint_text;
     bool split_mode{ false };
     bool isWindowOpen();
+
 
 private:
     sf::RenderWindow window;
@@ -66,17 +63,29 @@ private:
     bool can_show_inputWindow = false;
     bool can_show_colorSelector = false;
 
-    void showMemuBar(Solution &sol);
+    void showMemuBar();
     float memuBarHeight;
 
     void showHintBar();
-    void showBottomBar(const Solution &sol);
+    void showBottomBar();
 
-    void showInputWindow(const Solution &sol);
+    void showInputWindow();
     char InputBuf[256];
     static int   Stricmp(const char* s1, const char* s2)         { int d; while ((d = toupper(*s2) - toupper(*s1)) == 0 && *s1) { s1++; s2++; } return d; }
     static void  Strtrim(char* s)                                { char* str_end = s + strlen(s); while (str_end > s && str_end[-1] == ' ') str_end--; *str_end = 0; }
     void ExecCommand(const char* command_line);
 
     void showColorSelector();
+
+    int nRemains{};
+    std::string curr_oper;
+    int order_idx{ -1 };
+    std::ifstream input_file;
+    std::ifstream findRemainingsFile;
+    std::vector<std::string> operations{};
+    std::list<std::string> operations_queue;
+    std::vector<Rect> output_rects{};
+    PolygonSet polygon_set{};
+    std::string split_method{ "SH" };
+    int find_remain_polygons(int line_cnt);
 };

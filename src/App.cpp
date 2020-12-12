@@ -1,5 +1,8 @@
 #include "App.h"
+#include "PolygonSetHelper.h"
 #include <stdexcept>
+#include <sstream>
+#include <array>
 
 // contructor
 App::App(int w, int h)
@@ -48,7 +51,175 @@ App::App(int w, int h)
     lines.reserve(100000);
 }
 
-void App::render(Solution &sol, bool can_draw_shapes)
+void App::execute_and_render_operations()
+{
+    isImportFile = false;
+    const int psh_array_size = 50;
+    std::array<PolygonSetHelper, psh_array_size> psh_array{};
+    bool isPshArrReady = true;
+
+    std::string token;
+    std::istringstream iss;
+
+    input_file >> token;
+    if (token != "OPERATION")
+    {
+        std::cerr << "The first line of the input file must be operation list!";
+        std::exit(-1);
+    }
+
+    while (input_file >> token && token != ";")
+    {
+        operations.push_back(token);
+        operations_queue.push_back(token);
+    }
+
+    if(!operations_queue.empty())
+        operations_queue.pop_back();
+
+    split_method = operations.back();
+
+    while (!operations_queue.empty() && window.isOpen() && !isImportFile)
+    {
+        curr_oper = operations_queue.front();
+
+        if (!operations_queue.empty())
+            operations_queue.pop_front();
+
+        input_file.clear();
+        input_file.seekg(0, input_file.beg);
+        std::string line;
+        int line_cnt = 0;
+        while (getline(input_file, line) && window.isOpen() && !isImportFile)
+        {
+            line_cnt++;
+            if (line[0] != 'D')
+            {
+                continue;
+            }
+            if (line.rfind(curr_oper) != std::string::npos)
+            {
+                order_idx++;
+                nRemains = find_remain_polygons(line_cnt);
+                while (getline(input_file, line) && nRemains > 0 && !isImportFile)
+                {
+                    line_cnt++;
+                    iss.clear();
+                    iss.str(line);
+                    iss >> token;
+                    if (token == "END")
+                    {
+                        break;
+                    }
+                    if (token == "POLYGON")
+                    {
+                        Polygon_Holes polygon;
+                        std::vector<Point> pts{};
+                        pts.reserve(10);
+
+                        int x{}, y{};
+                        while (iss >> x)
+                        {
+                            iss >> y;
+                            pts.push_back(gtl::construct<Point>(x, y));
+                        }
+
+                        if (!pts.empty())
+                            pts.pop_back();
+
+                        gtl::set_points(polygon, pts.begin(), pts.end());
+
+                        nRemains--;
+
+                        std::string message;
+                        if (step_cnt == 0)
+                        {
+                            message += curr_oper + " ";
+                            message += "Current Task (at line " + std::to_string(line_cnt) + "): ";
+                            message += line;
+                            message += " (remaining " + std::to_string(nRemains) + " polygons...)";
+                            hint_text = message;
+                        }
+                        else
+                        {
+                            hint_text = curr_oper + " processing... (Remaining polygons: " + std::to_string(nRemains) + ")";
+                        }
+
+                        Point boundary_center;
+                        gtl::center(boundary_center, polygon);
+                        focusPoint = plotPos(boundary_center.x(), boundary_center.y());
+                        if (focusMode)
+                        {
+                            camera.setCenter(focusPoint);
+                            window.setView(camera);
+                        }
+
+                        // ---------render and execute operation on polygon set----------
+                        if (step_cnt == 0)
+                        {
+                            polygon_set.push_back(polygon);
+                            while(!can_start_step && window.isOpen() && !isImportFile) 
+                            {
+                                render();
+                            }
+                            isPshArrReady = false;
+                            can_start_step = false;
+
+                            if (!polygon_set.empty())
+                                polygon_set.pop_back();
+                        }
+
+                        if (isImportFile)
+                            break;
+
+                        PolygonSetHelper &curr_psh = psh_array[line_cnt % psh_array_size];
+                        curr_psh.push_future(
+                            std::async(std::launch::async, &PolygonSetHelper::mergePolygon, &curr_psh, polygon)
+                        ); 
+
+                        if (step_cnt > 0)
+                            step_cnt--;
+
+                        if ((!isPshArrReady && step_cnt == 0) || isPause == true)
+                        {
+                            for (auto &psh : psh_array) 
+                            {
+                                psh.wait_futures();
+                                curr_oper[0] == 'M' ? polygon_set += psh.ps : polygon_set -= psh.ps;
+                                psh.ps.clear();
+                            }
+                            step_cnt = 0;
+                            isPause = false;
+                            isPshArrReady = true;
+                        }
+
+                        render(false);
+                    }
+                }
+
+                render();
+                step_cnt = 0;
+                break;
+            }
+        }
+    }
+
+    if (!isImportFile)
+    {
+        if (split_method == "SV")
+            gtl::get_rectangles(output_rects, polygon_set);
+        else if (split_method == "SH")
+            gtl::get_rectangles(output_rects, polygon_set, gtl::HORIZONTAL);
+        else
+            gtl::get_max_rectangles(output_rects, polygon_set);   
+
+        order_idx++;
+        hint_text = "All operations are done. You can export the output result now.";
+        isAllDone = true;
+    }
+}
+
+void App::render(bool can_draw_shapes)
 {
     sf::Event event;
     sf::Time elapsed_time = deltaClock.getElapsedTime();
@@ -178,20 +349,20 @@ void App::render(Solution &sol, bool can_draw_shapes)
 
     ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[2]);
 
-    showMemuBar(sol);
+    showMemuBar();
     if (can_show_hintBar)           showHintBar();
     if (can_show_colorSelector)     showColorSelector();
-    if (can_show_inputWindow)       showInputWindow(sol);
-    showBottomBar(sol);
+    if (can_show_inputWindow)       showInputWindow();
+    showBottomBar();
 
     ImGui::PopFont();
 
     window.clear(bgColor);
     if (can_draw_shapes)
     {
-        draw_polygon_set(sol.polygon_set);
+        draw_polygon_set(polygon_set);
         if (split_mode)
-            draw_rects_edge(sol.output_rects);
+            draw_rects_edge(output_rects);
     }
 
     ImGui::SFML::Render(window);
@@ -279,8 +450,7 @@ void App::draw_polygon_set(const PolygonSet &ps)
     }
 }
 
-// TODO: set solution to const
-void App::showMemuBar(Solution &sol)
+void App::showMemuBar()
 {
     if (ImGui::BeginMainMenuBar())
     {
@@ -293,7 +463,30 @@ void App::showMemuBar(Solution &sol)
                 if ( result == NFD_OKAY )
                 {
                     isImportFile = true;
-                    sol.setInputFile(input_file_path);
+
+                    input_file.close();
+                    input_file.clear();
+                    findRemainingsFile.close();
+                    findRemainingsFile.clear();
+
+                    input_file.open(input_file_path);
+                    findRemainingsFile.open(input_file_path);
+                    if (!input_file)
+                    {
+                        printf("1Cannot open %s", input_file_path);
+                        std::exit(-1);
+                    }
+                    if (!findRemainingsFile)
+                    {
+                        printf("2Cannot open %s", input_file_path);
+                        std::exit(-1);
+                    }
+                    order_idx = -1;
+                    output_rects.clear();
+                    polygon_set.clear();
+                    operations.clear();
+                    operations_queue.clear();
+
                     step_cnt = 0;
                     can_start_step = false;
                     isAllDone = false;
@@ -319,7 +512,7 @@ void App::showMemuBar(Solution &sol)
                 if ( result == NFD_OKAY )
                 {
                     std::ofstream output_file{ savePath };
-                    for (auto rect : sol.output_rects)
+                    for (auto rect : output_rects)
                     {
                         output_file << "RECT " << gtl::xl(rect) << " " << gtl::yl(rect)
                                     << " " << gtl::xh(rect) << " " << gtl::yh(rect) << " ;\n";
@@ -352,7 +545,7 @@ void App::showMemuBar(Solution &sol)
     }
 }
 
-void App::showBottomBar(const Solution &sol)
+void App::showBottomBar()
 {
     static sf::Vector2f last_mouse_pos, last_camera_center;
     static float last_world_scale;
@@ -392,9 +585,9 @@ void App::showBottomBar(const Solution &sol)
 
             ImGui::Text("Operation Order: ");
             int oper_cnt = 0;
-            for (const auto &oper_str : sol.operations) 
+            for (const auto &oper_str : operations) 
             {
-                if (sol.order_idx == oper_cnt)
+                if (order_idx == oper_cnt)
                 {
                     ImGui::SameLine();
                     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.4f, 0.4f, 1.0f));
@@ -422,7 +615,7 @@ void App::showBottomBar(const Solution &sol)
             ImGui::SameLine();
 
             ImGui::Text("Operation Order: ");
-            for (const auto &oper_str : sol.operations) 
+            for (const auto &oper_str : operations) 
             {
                 ImGui::SameLine();
                 ImGui::Text((oper_str + " ").c_str());
@@ -489,7 +682,7 @@ void App::showColorSelector()
     
 }
 
-void App::showInputWindow(const Solution &sol)
+void App::showInputWindow()
 {
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize;
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(36.0f / 255.0f, 36.0f / 255.0f, 36.0f / 255.0f, 0.8f));
@@ -498,7 +691,7 @@ void App::showInputWindow(const Solution &sol)
     {
         ImGui::SetWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x / 2.0f - ImGui::GetWindowWidth() / 2.0f, 80.0f));
 
-        std::string message = sol.curr_oper + " remaining polygons: " + std::to_string(sol.nRemains);
+        std::string message = curr_oper + " remaining polygons: " + std::to_string(nRemains);
         message += ". Please enter how many steps you want to operate.";
         ImGui::Text(message.c_str());
         ImGui::Separator();
@@ -543,4 +736,23 @@ void App::ExecCommand(const char* command_line)
         else 
             step_cnt = 0;
     }
+}
+
+int App::find_remain_polygons(int line_cnt)
+{
+    findRemainingsFile.seekg(0);
+    for (int i = 0; i < line_cnt; i++) 
+        findRemainingsFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+    std::string line;
+    int polygon_cnt = 0;
+    while (getline(findRemainingsFile, line)) 
+    {
+        polygon_cnt++;
+        if (line[0] == 'E')
+            break;
+    }
+
+    findRemainingsFile.clear();
+    return polygon_cnt;
 }
