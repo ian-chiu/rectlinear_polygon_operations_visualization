@@ -112,7 +112,7 @@ void App::render(Solution &sol, bool can_draw_shapes)
                 break;
 
             case sf::Keyboard::I:
-                if (step_cnt == 0) 
+                if (!isAllDone && step_cnt == 0) 
                     can_show_inputWindow = true;
                 break;
 
@@ -189,7 +189,6 @@ void App::render(Solution &sol, bool can_draw_shapes)
     window.clear(bgColor);
     if (can_draw_shapes)
     {
-        // split_mode ? draw_rectangles(sol.output_rects) : draw_polygon_set(sol.polygon_set);
         draw_polygon_set(sol.polygon_set);
         if (split_mode)
             draw_rects_edge(sol.output_rects);
@@ -293,8 +292,11 @@ void App::showMemuBar(Solution &sol)
                 nfdresult_t result = NFD_OpenDialog( "txt", NULL, &input_file_path);
                 if ( result == NFD_OKAY )
                 {
-                    isAllDone = false;
+                    isImportFile = true;
                     sol.setInputFile(input_file_path);
+                    step_cnt = 0;
+                    can_start_step = false;
+                    isAllDone = false;
 
                     puts("Success!");
                     puts(input_file_path);

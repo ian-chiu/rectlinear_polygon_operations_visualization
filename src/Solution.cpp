@@ -71,9 +71,11 @@ void Solution::setInputFile(nfdchar_t *input_file_path)
         printf("2Cannot open %s", input_file_path);
         std::exit(-1);
     }
+    order_idx = -1;
     output_rects.clear();
     polygon_set.clear();
     operations.clear();
+    operations_queue.clear();
 }
 
 // TODO: DELETE THIS
@@ -97,6 +99,7 @@ void Solution::read_operations()
 
 void Solution::execute_and_render_operations(App &app)
 {
+    app.isImportFile = false;
     const int psh_array_size = 50;
     std::array<PolygonSetHelper, psh_array_size> psh_array{};
     bool isPshArrReady = true;
@@ -116,19 +119,24 @@ void Solution::execute_and_render_operations(App &app)
         operations.push_back(token);
         operations_queue.push_back(token);
     }
-    operations_queue.pop_back();
+
+    if(!operations_queue.empty())
+        operations_queue.pop_back();
+
     split_method = operations.back();
 
-    while (!operations_queue.empty() && app.isWindowOpen())
+    while (!operations_queue.empty() && app.isWindowOpen() && !app.isImportFile)
     {
         curr_oper = operations_queue.front();
-        operations_queue.pop_front();
+
+        if (!operations_queue.empty())
+            operations_queue.pop_front();
 
         input_file.clear();
         input_file.seekg(0, input_file.beg);
         std::string line;
         int line_cnt = 0;
-        while (getline(input_file, line) && app.isWindowOpen())
+        while (getline(input_file, line) && app.isWindowOpen() && !app.isImportFile)
         {
             line_cnt++;
             if (line[0] != 'D')
@@ -139,7 +147,7 @@ void Solution::execute_and_render_operations(App &app)
             {
                 order_idx++;
                 nRemains = find_remain_polygons(line_cnt);
-                while (getline(input_file, line) && nRemains > 0)
+                while (getline(input_file, line) && nRemains > 0 && !app.isImportFile)
                 {
                     line_cnt++;
                     iss.clear();
@@ -161,7 +169,10 @@ void Solution::execute_and_render_operations(App &app)
                             iss >> y;
                             pts.push_back(gtl::construct<Point>(x, y));
                         }
-                        pts.pop_back();
+
+                        if (!pts.empty())
+                            pts.pop_back();
+
                         gtl::set_points(polygon, pts.begin(), pts.end());
 
                         nRemains--;
@@ -193,19 +204,25 @@ void Solution::execute_and_render_operations(App &app)
                         if (app.step_cnt == 0)
                         {
                             polygon_set.push_back(polygon);
-                            while(!app.can_start_step && app.isWindowOpen()) 
+                            while(!app.can_start_step && app.isWindowOpen() && !app.isImportFile) 
                             {
                                 app.render(*this);
                             }
                             isPshArrReady = false;
                             app.can_start_step = false;
-                            polygon_set.pop_back();
+
+                            if (!polygon_set.empty())
+                                polygon_set.pop_back();
                         }
+
+                        if (app.isImportFile)
+                            break;
 
                         PolygonSetHelper &curr_psh = psh_array[line_cnt % psh_array_size];
                         curr_psh.push_future(
                             std::async(std::launch::async, &PolygonSetHelper::mergePolygon, &curr_psh, polygon)
                         ); 
+
                         if (app.step_cnt > 0)
                             app.step_cnt--;
 
@@ -225,17 +242,21 @@ void Solution::execute_and_render_operations(App &app)
                         app.render(*this, false);
                     }
                 }
+
                 app.render(*this);
                 app.step_cnt = 0;
                 break;
             }
         }
     }
-    execute_split();
-    order_idx++;
-    curr_oper = operations.back();
-    app.hint_text = "All operations are done. The output result is in data/output.txt.";
-    app.isAllDone = true;
+
+    if (!app.isImportFile)
+    {
+        execute_split();   
+        order_idx++;
+        app.hint_text = "All operations are done. The output result is in data/output.txt.";
+        app.isAllDone = true;
+    }
 }
 
 void Solution::execute_split()

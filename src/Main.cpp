@@ -11,6 +11,7 @@ int main()
 {
     Solution solution;
     App app{1280, 720};
+    app.hint_text = "Welcome. Please import a file to start visualization.";
 
     while (app.isWindowOpen())
     {

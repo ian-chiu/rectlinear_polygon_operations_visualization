@@ -23,6 +23,7 @@ public:
     App(int win_width = 1280, int win_height = 720);
     void render(Solution &solution, bool can_draw_shapes = true);
     bool isAllDone = true;
+    bool isImportFile = false;
     bool can_start_step = false;
     std::string hint_text;
     bool split_mode{ false };
