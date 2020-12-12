@@ -17,7 +17,7 @@ struct PolygonSetHelper
         ps.reserve(1000);
     }
     std::queue<std::future<void>> futures;
-    PolygonSet ps{};
+    PolygonSet_NoHoles ps{};
 
     void push_future(std::future<void> &&future)
     {
@@ -35,7 +35,7 @@ struct PolygonSetHelper
         }
     }
 
-    void mergePolygon(Polygon_Holes polygon)
+    void mergePolygon(Polygon_NoHoles polygon)
     {
         std::lock_guard<std::mutex> lock(m_mtx);
         ps += polygon;

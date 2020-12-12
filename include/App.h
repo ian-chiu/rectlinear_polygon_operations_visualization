@@ -57,7 +57,7 @@ private:
     void draw_rectangles(const std::vector<Rect> &rects, const sf::Color &color);
     void draw_rects_edge(const std::vector<Rect> &rects);
     std::vector<sf::Vertex> lines;
-    void draw_polygon_set(const PolygonSet &ps);
+    void draw_polygon_set(const PolygonSet_NoHoles &ps);
 
     bool can_show_hintBar = true;
     bool can_show_inputWindow = false;
@@ -85,7 +85,7 @@ private:
     std::vector<std::string> operations{};
     std::list<std::string> operations_queue;
     std::vector<Rect> output_rects{};
-    PolygonSet polygon_set{};
+    PolygonSet_NoHoles polygon_set{};
     std::string split_method{ "SH" };
     int find_remain_polygons(int line_cnt);
 };
