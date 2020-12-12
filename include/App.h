@@ -12,6 +12,11 @@
 #include "cmake_variables.h"
 #include "gtl_poly_types.h"
 
+auto ColorFromBytes = [](uint8_t r, uint8_t g, uint8_t b)
+{
+    return ImVec4((float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f, 1.0f);
+};
+
 class App
 {
 public:
@@ -33,12 +38,14 @@ private:
     int win_height;
     sf::Font font;
     sf::Texture texture;
-    sf::Color boardColor{ 25, 68, 43 };
-    sf::Color bgColor{ sf::Color::Black };
+    sf::Color boardColor{ 9, 78, 57 };
+    sf::Color bgColor{ 20, 20, 20 };
     sf::Color operColor{ 246, 164, 58, 100 };
-    float bg_rbg[3] = { 0.f, 0.f, 0.f };
-    float board_rbg[3] = { 25.0f / 255.f, 68.0f / 255.f, 43.0f / 255.f };
+    sf::Color lineColor{ bgColor };
+    float bg_rbg[3] = { 20.0f / 255.f, 20.0f / 255.f, 20.0f / 255.f };
+    float board_rbg[3] = { 9.0f / 255.f, 78.0f / 255.f, 57.0f / 255.f };
     float oper_rbg[4] = { 246.0f / 255.f, 164.0f / 255.f, 58.0f / 255.f, 0.7f };
+    float line_rbg[3] = { 20.0f / 255.f, 20.0f / 255.f, 20.0f / 255.f };
     sf::Vector2f getMousePlotPos();
 
     nfdchar_t *input_file_path = NULL;
@@ -62,7 +69,7 @@ private:
 
     bool can_show_hintBar = true;
     bool can_show_inputWindow = false;
-    bool can_show_colorSelector = false;
+    bool can_show_styleWindow = false;
 
     void showMemuBar();
     float memuBarHeight;
@@ -76,7 +83,7 @@ private:
     static void  Strtrim(char* s)                                { char* str_end = s + strlen(s); while (str_end > s && str_end[-1] == ' ') str_end--; *str_end = 0; }
     void ExecCommand(const char* command_line);
 
-    void showColorSelector();
+    void showStyleWindow();
 
     int nRemains{};
     std::string curr_oper;
@@ -89,4 +96,9 @@ private:
     PolygonSet_NoHoles polygon_set{};
     std::string split_method{ "SH" };
     int find_remain_polygons(int line_cnt);
+
+    // Color Themes
+    void styleColorsLightGreen();
+    void styleColorsDarkRed();
+    void styleColorsDarkGrey();
 };
