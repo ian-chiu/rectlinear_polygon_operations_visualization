@@ -47,24 +47,36 @@ private:
     std::mutex m_mtx;
 };
 
-Solution::Solution(std::string infile, std::string outfile) 
-    : input_file(infile), output_file(outfile), input_file_path(infile)
-{
-    if (!input_file)
-    {
-        std::cerr << "Cannot open " + infile;
-        std::exit(-1);
-    }
-    
+Solution::Solution() 
+{    
     output_rects.reserve(10000);
 }
 
-Solution::~Solution()
+void Solution::setInputFile(nfdchar_t *input_file_path)
 {
     input_file.close();
-    output_file.close();
+    input_file.clear();
+    findRemainingsFile.close();
+    findRemainingsFile.clear();
+
+    input_file.open(input_file_path);
+    findRemainingsFile.open(input_file_path);
+    if (!input_file)
+    {
+        printf("1Cannot open %s", input_file_path);
+        std::exit(-1);
+    }
+    if (!findRemainingsFile)
+    {
+        printf("2Cannot open %s", input_file_path);
+        std::exit(-1);
+    }
+    output_rects.clear();
+    polygon_set.clear();
+    operations.clear();
 }
 
+// TODO: DELETE THIS
 void Solution::read_operations()
 {
     std::string token;
@@ -83,11 +95,6 @@ void Solution::read_operations()
     split_method = operations.back();
 }
 
-std::vector<std::string> Solution::copy_operations() const
-{
-    return std::vector<std::string>(operations);
-}
-
 void Solution::execute_and_render_operations(App &app)
 {
     const int psh_array_size = 50;
@@ -96,6 +103,22 @@ void Solution::execute_and_render_operations(App &app)
 
     std::string token;
     std::istringstream iss;
+
+    input_file >> token;
+    if (token != "OPERATION")
+    {
+        std::cerr << "The first line of the input file must be operation list!";
+        std::exit(-1);
+    }
+
+    while (input_file >> token && token != ";")
+    {
+        operations.push_back(token);
+        operations_queue.push_back(token);
+    }
+    operations_queue.pop_back();
+    split_method = operations.back();
+
     while (!operations_queue.empty() && app.isWindowOpen())
     {
         curr_oper = operations_queue.front();
@@ -229,7 +252,6 @@ void Solution::execute_split()
         output_file << "RECT " << gtl::xl(rect) << " " << gtl::yl(rect)
                     << " " << gtl::xh(rect) << " " << gtl::yh(rect) << " ;\n";
     }
-    input_file.close();
     output_file.close();
 }
 
@@ -240,19 +262,19 @@ std::string Solution::get_split_method() const
 
 int Solution::find_remain_polygons(int line_cnt)
 {
-    std::ifstream ifile{ input_file_path };
+    findRemainingsFile.seekg(0);
     for (int i = 0; i < line_cnt; i++) 
-        ifile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        findRemainingsFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     std::string line;
     int polygon_cnt = 0;
-    while (getline(ifile, line)) 
+    while (getline(findRemainingsFile, line)) 
     {
         polygon_cnt++;
         if (line[0] == 'E')
             break;
     }
 
-    ifile.close();
+    findRemainingsFile.clear();
     return polygon_cnt;
 }

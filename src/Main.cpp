@@ -9,18 +9,14 @@ using namespace gtl::operators;
 
 int main()
 {
-    Solution solution(CMAKE_SOURCE_DIR + "/data/input.txt", CMAKE_SOURCE_DIR + "/data/output.txt");
-    solution.read_operations();
-    
+    Solution solution;
     App app{1280, 720};
 
     while (app.isWindowOpen())
     {
-        // ----------------EXECUTE OPERATIONS----------------
         if (!app.isAllDone)
             solution.execute_and_render_operations(app);
-
-        // ------------ALL OPERATIONS ARE DONE-----------------
+        
         app.render(solution);
     }
 

@@ -7,6 +7,8 @@
 #include <string>
 #include <list>
 #include <vector>
+#include "nfd.h"
+#include "cmake_variables.h"
 #include "App.h"
 #include "gtl_poly_types.h"
 
@@ -15,28 +17,27 @@ class Solution
     friend class App;
 
 public:
-    Solution() = default;
-    Solution(std::string infile, std::string outfile);
-    ~Solution();
+    Solution();
 
     void read_operations();
     void execute_and_render_operations(App &app);
-    void execute_split();
-    std::vector<std::string> copy_operations() const;
-
+    void setInputFile(nfdchar_t *input_file_path);
+    bool isInputFileOpen() { return input_file.is_open(); }
     std::string get_split_method() const;
 
 private:
     int nRemains{};
     std::string curr_oper;
     int order_idx{ -1 };
-    std::ifstream input_file;
-    std::ofstream output_file;
-    std::string input_file_path;
+    mutable std::ifstream input_file;
+    mutable std::ifstream findRemainingsFile;
+    std::ofstream output_file{ CMAKE_SOURCE_DIR + "/data/output.txt" };
+    mutable nfdchar_t *input_file_path;
     std::vector<std::string> operations{};
     std::list<std::string> operations_queue;
     std::vector<Rect> output_rects{};
     PolygonSet polygon_set{};
     std::string split_method{ "SH" };
     int find_remain_polygons(int line_cnt);
+    void execute_split();
 };

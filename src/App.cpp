@@ -48,7 +48,7 @@ App::App(int w, int h)
     lines.reserve(100000);
 }
 
-void App::render(const Solution &sol, bool can_draw_shapes)
+void App::render(Solution &sol, bool can_draw_shapes)
 {
     sf::Event event;
     sf::Time elapsed_time = deltaClock.getElapsedTime();
@@ -178,7 +178,7 @@ void App::render(const Solution &sol, bool can_draw_shapes)
 
     ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[2]);
 
-    showMemuBar();
+    showMemuBar(sol);
     if (can_show_hintBar)           showHintBar();
     if (can_show_colorSelector)     showColorSelector();
     if (can_show_inputWindow)       showInputWindow(sol);
@@ -280,14 +280,36 @@ void App::draw_polygon_set(const PolygonSet &ps)
     }
 }
 
-void App::showMemuBar()
+// TODO: set solution to const
+void App::showMemuBar(Solution &sol)
 {
-    
     if (ImGui::BeginMainMenuBar())
     {
         memuBarHeight = ImGui::GetWindowHeight();
         if (ImGui::BeginMenu("File"))
         {
+            if (ImGui::MenuItem("Import"))
+            {
+                nfdresult_t result = NFD_OpenDialog( "txt", NULL, &input_file_path);
+                if ( result == NFD_OKAY )
+                {
+                    isAllDone = false;
+                    sol.setInputFile(input_file_path);
+
+                    puts("Success!");
+                    puts(input_file_path);
+                    free(input_file_path);
+                }
+                else if ( result == NFD_CANCEL )
+                {
+                    puts("User pressed cancel.");
+                }
+                else 
+                {
+                    printf("Error: %s\n", NFD_GetError() );
+                    std::exit(-1);
+                }
+            }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Tools"))

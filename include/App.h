@@ -5,8 +5,10 @@
 
 #include <vector>
 #include <queue>
+#include <string>
 
 #include <SFML/Graphics.hpp>
+#include "nfd.h"
 #include "imgui.h"
 #include "imgui-SFML.h"
 #include "Solution.h"
@@ -19,8 +21,8 @@ class App
 
 public:
     App(int win_width = 1280, int win_height = 720);
-    void render(const Solution &solution, bool can_draw_shapes = true);
-    bool isAllDone = false;
+    void render(Solution &solution, bool can_draw_shapes = true);
+    bool isAllDone = true;
     bool can_start_step = false;
     std::string hint_text;
     bool split_mode{ false };
@@ -39,6 +41,9 @@ private:
     float bg_rbg[3] = { 0.f, 0.f, 0.f };
     float board_rbg[3] = { 25.0f / 255.f, 68.0f / 255.f, 43.0f / 255.f };
     float oper_rbg[4] = { 246.0f / 255.f, 164.0f / 255.f, 58.0f / 255.f, 0.7f };
+
+    std::string output_file_path;
+    nfdchar_t *input_file_path = NULL;
 
     sf::View camera;
     sf::Vector2f focusPoint;
@@ -61,7 +66,7 @@ private:
     bool can_show_inputWindow = false;
     bool can_show_colorSelector = false;
 
-    void showMemuBar();
+    void showMemuBar(Solution &sol);
     float memuBarHeight;
 
     void showHintBar();

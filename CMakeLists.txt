@@ -22,6 +22,8 @@ find_package(SFML 2.5 COMPONENTS graphics REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(ImGui-SFML CONFIG REQUIRED)
 
+find_package(unofficial-nativefiledialog CONFIG REQUIRED)
+
 add_executable(visualization ${SOURCES})
 
 target_include_directories(visualization 
@@ -32,8 +34,8 @@ target_include_directories(visualization
 target_link_libraries(visualization 
     PRIVATE sfml-graphics
     PRIVATE ImGui-SFML::ImGui-SFML
+    PRIVATE unofficial::nativefiledialog::nfd
 )
-
 
 # -------------check all cmake variables----------------
 # get_cmake_property(_variableNames VARIABLES)
