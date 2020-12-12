@@ -312,9 +312,33 @@ void App::showMemuBar(Solution &sol)
                     std::exit(-1);
                 }
             }
-            if (ImGui::MenuItem("Export", 0, false, isAllDone))
+            if (ImGui::MenuItem("Export", 0, false, isAllDone && input_file_path != NULL ))
             {
-                std::cout << "Export\n";
+                nfdchar_t *savePath = NULL;
+                nfdresult_t result = NFD_SaveDialog( "txt", NULL, &savePath );
+                if ( result == NFD_OKAY )
+                {
+                    std::ofstream output_file{ savePath };
+                    for (auto rect : sol.output_rects)
+                    {
+                        output_file << "RECT " << gtl::xl(rect) << " " << gtl::yl(rect)
+                                    << " " << gtl::xh(rect) << " " << gtl::yh(rect) << " ;\n";
+                    }
+                    output_file.close();
+
+                    puts("Success!");
+                    puts(savePath);
+                    free(savePath);
+                }
+                else if ( result == NFD_CANCEL )
+                {
+                    puts("User pressed cancel.");
+                }
+                else 
+                {
+                    printf("Error: %s\n", NFD_GetError() );
+                    std::exit(-1);
+                }
             }
             ImGui::EndMenu();
         }

@@ -43,7 +43,6 @@ private:
     float board_rbg[3] = { 25.0f / 255.f, 68.0f / 255.f, 43.0f / 255.f };
     float oper_rbg[4] = { 246.0f / 255.f, 164.0f / 255.f, 58.0f / 255.f, 0.7f };
 
-    std::string output_file_path;
     nfdchar_t *input_file_path = NULL;
 
     sf::View camera;

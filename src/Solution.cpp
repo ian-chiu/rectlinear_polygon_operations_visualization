@@ -254,7 +254,7 @@ void Solution::execute_and_render_operations(App &app)
     {
         execute_split();   
         order_idx++;
-        app.hint_text = "All operations are done. The output result is in data/output.txt.";
+        app.hint_text = "All operations are done. You can export the output result now.";
         app.isAllDone = true;
     }
 }
@@ -267,13 +267,6 @@ void Solution::execute_split()
         gtl::get_rectangles(output_rects, polygon_set, gtl::HORIZONTAL);
     else
         gtl::get_max_rectangles(output_rects, polygon_set);
-
-    for (auto rect : output_rects)
-    {
-        output_file << "RECT " << gtl::xl(rect) << " " << gtl::yl(rect)
-                    << " " << gtl::xh(rect) << " " << gtl::yh(rect) << " ;\n";
-    }
-    output_file.close();
 }
 
 std::string Solution::get_split_method() const
