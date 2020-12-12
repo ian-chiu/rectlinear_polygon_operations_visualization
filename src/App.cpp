@@ -68,7 +68,7 @@ void App::render(Solution &sol, bool can_draw_shapes)
             win_height = event.size.height;
             win_width = event.size.width;
             camera.setSize(win_width * worldScale, win_height * worldScale);
-            camera.setCenter(focusPoint);
+            camera.setCenter(plotPos(focusPoint));
             window.setView(camera);
         }
         else if (event.type == sf::Event::MouseWheelMoved)
@@ -311,6 +311,10 @@ void App::showMemuBar(Solution &sol)
                     printf("Error: %s\n", NFD_GetError() );
                     std::exit(-1);
                 }
+            }
+            if (ImGui::MenuItem("Export", 0, false, isAllDone))
+            {
+                std::cout << "Export\n";
             }
             ImGui::EndMenu();
         }
