@@ -461,8 +461,8 @@ void App::draw_rectangles(const std::vector<Rect> &rects, const sf::Color &color
 
     for (auto rect : rects)
     {
-        float rect_width = rect.get(gtl::HORIZONTAL).high() - rect.get(gtl::HORIZONTAL).low();
-        float rect_height = rect.get(gtl::VERTICAL).high() - rect.get(gtl::VERTICAL).low();
+        int rect_width = rect.get(gtl::HORIZONTAL).high() - rect.get(gtl::HORIZONTAL).low();
+        int rect_height = rect.get(gtl::VERTICAL).high() - rect.get(gtl::VERTICAL).low();
         rectShape.setSize(sf::Vector2f(rect_width, rect_height));
         rectShape.setPosition(plotPos(gtl::xl(rect), gtl::yh(rect)));
         window.draw(rectShape);
@@ -489,6 +489,23 @@ void App::draw_rects_edge(const std::vector<Rect> &rects)
 
         lines.emplace_back(lt);
         lines.emplace_back(lb);
+
+        if (split_mode)
+        {
+            if (gtl::contains(rect, Point(getMousePlotPos().x, getMousePlotPos().y), false))
+            {
+                std::string message;
+                message += "left: " + std::to_string(gtl::xl(rect)) + "\n";
+                message += "top: " + std::to_string(gtl::yh(rect)) + "\n";
+                message += "width: " + std::to_string(gtl::delta(gtl::horizontal(rect))) + "\n";
+                message += "height: " + std::to_string(gtl::delta(gtl::vertical(rect))) + "\n";
+                ImGui::BeginTooltip();
+                ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                ImGui::TextUnformatted(message.c_str());
+                ImGui::PopTextWrapPos();
+                ImGui::EndTooltip();
+            }
+        }
     }
     window.draw(&lines[0], lines.size(), sf::Lines);
     lines.clear();
@@ -553,6 +570,7 @@ void App::showMemuBar()
                     step_cnt = 0;
                     can_start_step = false;
                     isAllDone = false;
+                    split_mode = false;
 
                     puts("Success!");
                     puts(input_file_path);
@@ -632,9 +650,7 @@ void App::showBottomBar()
 
         if (step_cnt <= 0)
         {
-            sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-            sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-            sf::Vector2f mousePlotPos = plotPos(worldPos.x, worldPos.y);
+            sf::Vector2f mousePlotPos = getMousePlotPos();
             last_mouse_pos = mousePlotPos;
             ImGui::Text("Mouse Position: (%.1f,%.1f)\t", mousePlotPos.x, mousePlotPos.y);
             ImGui::SameLine();
@@ -833,4 +849,11 @@ int App::find_remain_polygons(int line_cnt)
 
     findRemainingsFile.clear();
     return polygon_cnt;
+}
+
+sf::Vector2f App::getMousePlotPos()
+{
+    sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+    sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+    return plotPos(worldPos);
 }

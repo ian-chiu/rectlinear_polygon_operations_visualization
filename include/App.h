@@ -39,13 +39,14 @@ private:
     float bg_rbg[3] = { 0.f, 0.f, 0.f };
     float board_rbg[3] = { 25.0f / 255.f, 68.0f / 255.f, 43.0f / 255.f };
     float oper_rbg[4] = { 246.0f / 255.f, 164.0f / 255.f, 58.0f / 255.f, 0.7f };
+    sf::Vector2f getMousePlotPos();
 
     nfdchar_t *input_file_path = NULL;
 
     sf::View camera;
     sf::Vector2f focusPoint;
     bool focusMode = true;
-    float camera_speed = 0.5f;
+    float camera_speed = 0.8f;
     float worldScale = 1.0f;
 
     int step_cnt{};
