@@ -46,7 +46,7 @@ void App::execute_and_render_operations()
     isImportFile = false;
     const int psh_array_size = 50;
     std::array<PolygonSetHelper, psh_array_size> psh_array{};
-    bool isPshArrReady = true;
+    bool pshArrHasTask = false;
 
     std::string token;
     std::istringstream iss;
@@ -130,24 +130,25 @@ void App::execute_and_render_operations()
                             hint_text = curr_oper + " processing... (Remaining polygons: " + std::to_string(nRemains) + ")";
                         }
 
-                        Point boundary_center;
-                        gtl::center(boundary_center, polygon);
-                        focusPoint = plotPos(boundary_center.x(), boundary_center.y());
-                        if (focusMode)
-                        {
-                            camera.setCenter(focusPoint);
-                            window.setView(camera);
-                        }
 
                         // ---------render and execute operation on polygon set----------
                         if (step_cnt == 0)
                         {
+                            Point boundary_center;
+                            gtl::center(boundary_center, polygon);
+                            focusPoint = plotPos(boundary_center.x(), boundary_center.y());
+                            if (focusMode)
+                            {
+                                camera.setCenter(focusPoint);
+                                window.setView(camera);
+                            }
+
                             polygon_set.push_back(polygon);
                             while(!can_start_step && window.isOpen() && !isImportFile) 
                             {
                                 render();
                             }
-                            isPshArrReady = false;
+                            pshArrHasTask = true;
                             can_start_step = false;
 
                             if (!polygon_set.empty())
@@ -165,7 +166,7 @@ void App::execute_and_render_operations()
                         if (step_cnt > 0)
                             step_cnt--;
 
-                        if ((!isPshArrReady && step_cnt == 0) || isPause == true)
+                        if ((pshArrHasTask && step_cnt == 0) || isPause == true)
                         {
                             for (auto &psh : psh_array) 
                             {
@@ -175,7 +176,7 @@ void App::execute_and_render_operations()
                             }
                             step_cnt = 0;
                             isPause = false;
-                            isPshArrReady = true;
+                            pshArrHasTask = false;
                         }
 
                         render(false);
@@ -569,7 +570,9 @@ void App::showBottomBar()
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImGui::GetStyleColorVec4(ImGuiCol_MenuBarBg));
-    if (step_cnt > 0)  ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(80.0f / 255.0f, 80.0f / 255.0f, 80.0f / 255.0f, 1.0f));
+    
+    if (step_cnt > 0)  
+        ImGui::PushStyleColor(ImGuiCol_Text, ColorFromBytes(125, 125, 125));
 
     if (ImGui::Begin("test", (bool *)0, window_flags))
     {
