@@ -24,6 +24,8 @@ App::App(int w, int h)
     ImGui::SFML::Init(window, false);
     window.resetGLStates();
 
+    ImGui::StyleColorsLight();
+
     std::string font_path = CMAKE_SOURCE_DIR + "/resource/arial.ttf";
     ImGui::GetIO().Fonts->Clear(); 
     ImGui::GetIO().Fonts->AddFontFromFileTTF(font_path.c_str(), 20.0f);
@@ -329,6 +331,19 @@ void App::render(bool can_draw_shapes)
         }
     }
 
+    if (ImGui::IsMouseClicked(0))
+    {
+        cameraCenterBeforeDragging = camera.getCenter();
+    }
+    if (ImGui::IsMouseDragging(0))
+    {
+        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+        sf::Vector2f pix_drag_dis{ (float)ImGui::GetMouseDragDelta().x, (float)ImGui::GetMouseDragDelta().y };
+        sf::Vector2f world_drag_dis = pix_drag_dis * worldScale;
+        camera.setCenter(cameraCenterBeforeDragging + world_drag_dis);
+        window.setView(camera);
+    }
+
     ImGui::SFML::Update(window, deltaClock.restart());
 
     ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[2]);
@@ -413,8 +428,7 @@ void App::draw_rects_edge(const std::vector<Rect> &rects)
 
         if (split_mode)
         {
-            // TODO: Write self defined contains function using float
-            if (gtl::contains(rect, Point(getMousePlotPos().x, getMousePlotPos().y)))
+            if ( contains(rect, getMousePlotPos()) )
             {
                 std::string message;
                 message += "left: " + std::to_string(gtl::xl(rect)) + "\n";
@@ -752,13 +766,15 @@ void App::showInputWindow()
             strcpy(s, "");
         }
 
-        // Auto-focus on window apparition
-        ImGui::SetItemDefaultFocus();
+        
+        if ( sf::Mouse::isButtonPressed(sf::Mouse::Left))
+        {
+            can_show_inputWindow = false;
+        }
+
+        ImGui::SetItemDefaultFocus();   // Auto-focus on window apparition
         ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
 
-        if (!ImGui::IsWindowFocused())
-            can_show_inputWindow = false;
-        
         ImGui::End();
     }
 }
@@ -796,6 +812,13 @@ int App::find_remain_polygons(int line_cnt)
 
     findRemainingsFile.clear();
     return polygon_cnt;
+}
+
+bool App::contains(Rect rect, sf::Vector2f pos)
+{
+    bool isInRangeX = (float)gtl::xl(rect) < pos.x && (float)gtl::xh(rect) > pos.x;
+    bool isInRangeY = (float)gtl::yl(rect) < pos.y && (float)gtl::yh(rect) > pos.y;
+    return isInRangeX && isInRangeY;
 }
 
 sf::Vector2f App::getMousePlotPos()
