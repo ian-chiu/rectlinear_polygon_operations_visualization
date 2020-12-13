@@ -38,7 +38,9 @@ App::App(int w, int h)
 
     camera.reset(sf::FloatRect(0.0f, 0.0f, win_width, win_height));
     window.setView(camera);
-    lines.reserve(100000);
+    lines.reserve(40000);
+    output_rects.reserve(10000);
+    rect_shapes.reserve(10000);
 }
 
 void App::execute_and_render_operations()
@@ -201,8 +203,8 @@ void App::execute_and_render_operations()
 
         order_idx++;
         hint_text = "All operations are done. You can export the output result now.";
-        split_mode = true;
         isAllDone = true;
+        split_mode = true;
     }
 }
 
@@ -448,8 +450,7 @@ void App::draw_rects_edge(const std::vector<Rect> &rects)
 
 void App::draw_polygon_set(const PolygonSet_NoHoles &ps)
 {
-    static std::vector<Rect> rect_shapes;
-    static sf::Color shape_color;
+    sf::Color shape_color;
     int polygon_cnt = 0;
     for (const auto &poly : ps)
     {
@@ -477,35 +478,7 @@ void App::showMemuBar()
                 nfdresult_t result = NFD_OpenDialog( "txt", NULL, &input_file_path);
                 if ( result == NFD_OKAY )
                 {
-                    isImportFile = true;
-
-                    input_file.close();
-                    input_file.clear();
-                    findRemainingsFile.close();
-                    findRemainingsFile.clear();
-
-                    input_file.open(input_file_path);
-                    findRemainingsFile.open(input_file_path);
-                    if (!input_file)
-                    {
-                        printf("Cannot open %s", input_file_path);
-                        std::exit(-1);
-                    }
-                    if (!findRemainingsFile)
-                    {
-                        printf("Cannot open %s", input_file_path);
-                        std::exit(-1);
-                    }
-                    order_idx = -1;
-                    output_rects.clear();
-                    polygon_set.clear();
-                    operations.clear();
-                    operations_queue.clear();
-                    step_cnt = 0;
-                    can_start_step = false;
-                    isAllDone = false;
-                    split_mode = false;
-                    focusMode = true;
+                    importInputFile();
                 }
                 else if ( result == NFD_CANCEL )
                 {
@@ -523,13 +496,7 @@ void App::showMemuBar()
                 nfdresult_t result = NFD_SaveDialog( "txt", NULL, &savePath );
                 if ( result == NFD_OKAY )
                 {
-                    std::ofstream output_file{ savePath };
-                    for (auto rect : output_rects)
-                    {
-                        output_file << "RECT " << gtl::xl(rect) << " " << gtl::yl(rect)
-                                    << " " << gtl::xh(rect) << " " << gtl::yh(rect) << " ;\n";
-                    }
-                    output_file.close();
+                    exportOutputFile(savePath);
                 }
                 else if ( result == NFD_CANCEL )
                 {
@@ -570,7 +537,7 @@ void App::showBottomBar()
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImGui::GetStyleColorVec4(ImGuiCol_MenuBarBg));
-    
+
     if (step_cnt > 0)  
         ImGui::PushStyleColor(ImGuiCol_Text, ColorFromBytes(125, 125, 125));
 
@@ -786,6 +753,45 @@ void App::ExecCommand(const char* command_line)
         else 
             step_cnt = 0;
     }
+}
+
+void App::importInputFile()
+{
+    isImportFile = true;
+    order_idx = -1;
+    output_rects.clear();
+    polygon_set.clear();
+    operations.clear();
+    operations_queue.clear();
+    step_cnt = 0;
+    can_start_step = false;
+    isAllDone = false;
+    split_mode = false;
+    focusMode = true;
+
+    input_file.close();
+    input_file.clear();
+    findRemainingsFile.close();
+    findRemainingsFile.clear();
+
+    input_file.open(input_file_path);
+    findRemainingsFile.open(input_file_path);
+    if (!input_file || !findRemainingsFile)
+    {
+        printf("Cannot open %s", input_file_path);
+        std::exit(-1);
+    }
+}
+
+void App::exportOutputFile(nfdchar_t *savePath)
+{
+    std::ofstream output_file{ savePath };
+    for (const auto &rect : output_rects)
+    {
+        output_file << "RECT " << gtl::xl(rect) << " " << gtl::yl(rect)
+                    << " " << gtl::xh(rect) << " " << gtl::yh(rect) << " ;\n";
+    }
+    output_file.close();
 }
 
 int App::find_remain_polygons(int line_cnt)

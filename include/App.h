@@ -64,6 +64,7 @@ private:
     sf::Vector2i plotPos(const sf::Vector2i &pt);
     
     void draw_rectangles(const std::vector<Rect> &rects, const sf::Color &color);
+    std::vector<Rect> rect_shapes;
     void draw_rects_edge(const std::vector<Rect> &rects);
     std::vector<sf::Vertex> lines;
     bool contains(Rect rect, sf::Vector2f pos);
@@ -75,6 +76,8 @@ private:
 
     void showMemuBar();
     float memuBarHeight;
+    void importInputFile();
+    void exportOutputFile(nfdchar_t *savePath);
 
     void showHintBar();
     void showBottomBar();
