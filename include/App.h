@@ -44,13 +44,14 @@ private:
     sf::Color lineColor{ bgColor };
     float bg_rbg[3] = { 20.0f / 255.f, 20.0f / 255.f, 20.0f / 255.f };
     float board_rbg[3] = { 9.0f / 255.f, 78.0f / 255.f, 57.0f / 255.f };
-    float oper_rbg[4] = { 246.0f / 255.f, 164.0f / 255.f, 58.0f / 255.f, 0.7f };
+    float oper_rbg[4] = { 246.0f / 255.f, 164.0f / 255.f, 58.0f / 255.f, 0.8f };
     float line_rbg[3] = { 20.0f / 255.f, 20.0f / 255.f, 20.0f / 255.f };
     sf::Vector2f getMousePlotPos();
 
     nfdchar_t *input_file_path = NULL;
 
     sf::View camera;
+    sf::Vector2f cameraCenterBeforeDragging;
     sf::Vector2f focusPoint;
     bool focusMode = true;
     float camera_speed = 0.8f;
@@ -65,6 +66,7 @@ private:
     void draw_rectangles(const std::vector<Rect> &rects, const sf::Color &color);
     void draw_rects_edge(const std::vector<Rect> &rects);
     std::vector<sf::Vertex> lines;
+    bool contains(Rect rect, sf::Vector2f pos);
     void draw_polygon_set(const PolygonSet_NoHoles &ps);
 
     bool can_show_hintBar = true;

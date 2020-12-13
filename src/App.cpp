@@ -24,6 +24,8 @@ App::App(int w, int h)
     ImGui::SFML::Init(window, false);
     window.resetGLStates();
 
+    ImGui::StyleColorsLight();
+
     std::string font_path = CMAKE_SOURCE_DIR + "/resource/arial.ttf";
     ImGui::GetIO().Fonts->Clear(); 
     ImGui::GetIO().Fonts->AddFontFromFileTTF(font_path.c_str(), 20.0f);
@@ -280,17 +282,15 @@ void App::render(bool can_draw_shapes)
                 break;
             }   
         }
-        // else if (event.type == sf::Event::MouseButtonPressed)
-        // {
-        //     if (event.mouseButton.button == sf::Mouse::Left && !ImGui::IsAnyWindowFocused())
-        //     {
-        //         sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-        //         sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-        //         sf::Vector2f mousePlotPos = plotPos(worldPos);
-        //         camera.setCenter(mousePlotPos);
-        //         window.setView(camera);
-        //     }
-        // }
+        else if (event.type == sf::Event::MouseButtonPressed)
+        {
+            if (event.mouseButton.button == sf::Mouse::Left && !ImGui::IsAnyWindowFocused())
+            {
+                if (!isAllDone && !can_show_inputWindow) 
+                    can_start_step = true;
+                break;
+            }
+        }
     }
 
     if (!can_show_inputWindow)
@@ -327,6 +327,19 @@ void App::render(bool can_draw_shapes)
             camera.zoom(1.05f);
             window.setView(camera);
         }
+    }
+
+    if (ImGui::IsMouseClicked(2))
+    {
+        cameraCenterBeforeDragging = camera.getCenter();
+    }
+    if (ImGui::IsMouseDragging(2))
+    {
+        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+        sf::Vector2f pix_drag_dis{ (float)ImGui::GetMouseDragDelta(2).x, (float)ImGui::GetMouseDragDelta(2).y };
+        sf::Vector2f world_drag_dis = pix_drag_dis * worldScale;
+        camera.setCenter(cameraCenterBeforeDragging + world_drag_dis);
+        window.setView(camera);
     }
 
     ImGui::SFML::Update(window, deltaClock.restart());
@@ -413,8 +426,7 @@ void App::draw_rects_edge(const std::vector<Rect> &rects)
 
         if (split_mode)
         {
-            // TODO: Write self defined contains function using float
-            if (gtl::contains(rect, Point(getMousePlotPos().x, getMousePlotPos().y)))
+            if ( contains(rect, getMousePlotPos()) )
             {
                 std::string message;
                 message += "left: " + std::to_string(gtl::xl(rect)) + "\n";
@@ -475,12 +487,12 @@ void App::showMemuBar()
                     findRemainingsFile.open(input_file_path);
                     if (!input_file)
                     {
-                        printf("1Cannot open %s", input_file_path);
+                        printf("Cannot open %s", input_file_path);
                         std::exit(-1);
                     }
                     if (!findRemainingsFile)
                     {
-                        printf("2Cannot open %s", input_file_path);
+                        printf("Cannot open %s", input_file_path);
                         std::exit(-1);
                     }
                     order_idx = -1;
@@ -493,14 +505,10 @@ void App::showMemuBar()
                     isAllDone = false;
                     split_mode = false;
                     focusMode = true;
-
-                    puts("Success!");
-                    puts(input_file_path);
-                    free(input_file_path);
                 }
                 else if ( result == NFD_CANCEL )
                 {
-                    puts("User pressed cancel.");
+                    // puts("User pressed cancel.");
                 }
                 else 
                 {
@@ -521,14 +529,10 @@ void App::showMemuBar()
                                     << " " << gtl::xh(rect) << " " << gtl::yh(rect) << " ;\n";
                     }
                     output_file.close();
-
-                    puts("Success!");
-                    puts(savePath);
-                    free(savePath);
                 }
                 else if ( result == NFD_CANCEL )
                 {
-                    puts("User pressed cancel.");
+                    // puts("User pressed cancel.");
                 }
                 else 
                 {
@@ -752,13 +756,15 @@ void App::showInputWindow()
             strcpy(s, "");
         }
 
-        // Auto-focus on window apparition
-        ImGui::SetItemDefaultFocus();
+        
+        if ( sf::Mouse::isButtonPressed(sf::Mouse::Left))
+        {
+            can_show_inputWindow = false;
+        }
+
+        ImGui::SetItemDefaultFocus();   // Auto-focus on window apparition
         ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
 
-        if (!ImGui::IsWindowFocused())
-            can_show_inputWindow = false;
-        
         ImGui::End();
     }
 }
@@ -796,6 +802,13 @@ int App::find_remain_polygons(int line_cnt)
 
     findRemainingsFile.clear();
     return polygon_cnt;
+}
+
+bool App::contains(Rect rect, sf::Vector2f pos)
+{
+    bool isInRangeX = (float)gtl::xl(rect) < pos.x && (float)gtl::xh(rect) > pos.x;
+    bool isInRangeY = (float)gtl::yl(rect) < pos.y && (float)gtl::yh(rect) > pos.y;
+    return isInRangeX && isInRangeY;
 }
 
 sf::Vector2f App::getMousePlotPos()
