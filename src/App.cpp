@@ -282,17 +282,15 @@ void App::render(bool can_draw_shapes)
                 break;
             }   
         }
-        // else if (event.type == sf::Event::MouseButtonPressed)
-        // {
-        //     if (event.mouseButton.button == sf::Mouse::Left && !ImGui::IsAnyWindowFocused())
-        //     {
-        //         sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-        //         sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-        //         sf::Vector2f mousePlotPos = plotPos(worldPos);
-        //         camera.setCenter(mousePlotPos);
-        //         window.setView(camera);
-        //     }
-        // }
+        else if (event.type == sf::Event::MouseButtonPressed)
+        {
+            if (event.mouseButton.button == sf::Mouse::Left && !ImGui::IsAnyWindowFocused())
+            {
+                if (!isAllDone && !can_show_inputWindow) 
+                    can_start_step = true;
+                break;
+            }
+        }
     }
 
     if (!can_show_inputWindow)
@@ -331,14 +329,14 @@ void App::render(bool can_draw_shapes)
         }
     }
 
-    if (ImGui::IsMouseClicked(0))
+    if (ImGui::IsMouseClicked(2))
     {
         cameraCenterBeforeDragging = camera.getCenter();
     }
-    if (ImGui::IsMouseDragging(0))
+    if (ImGui::IsMouseDragging(2))
     {
         ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-        sf::Vector2f pix_drag_dis{ (float)ImGui::GetMouseDragDelta().x, (float)ImGui::GetMouseDragDelta().y };
+        sf::Vector2f pix_drag_dis{ (float)ImGui::GetMouseDragDelta(2).x, (float)ImGui::GetMouseDragDelta(2).y };
         sf::Vector2f world_drag_dis = pix_drag_dis * worldScale;
         camera.setCenter(cameraCenterBeforeDragging + world_drag_dis);
         window.setView(camera);
@@ -489,12 +487,12 @@ void App::showMemuBar()
                     findRemainingsFile.open(input_file_path);
                     if (!input_file)
                     {
-                        printf("1Cannot open %s", input_file_path);
+                        printf("Cannot open %s", input_file_path);
                         std::exit(-1);
                     }
                     if (!findRemainingsFile)
                     {
-                        printf("2Cannot open %s", input_file_path);
+                        printf("Cannot open %s", input_file_path);
                         std::exit(-1);
                     }
                     order_idx = -1;
@@ -507,14 +505,10 @@ void App::showMemuBar()
                     isAllDone = false;
                     split_mode = false;
                     focusMode = true;
-
-                    puts("Success!");
-                    puts(input_file_path);
-                    free(input_file_path);
                 }
                 else if ( result == NFD_CANCEL )
                 {
-                    puts("User pressed cancel.");
+                    // puts("User pressed cancel.");
                 }
                 else 
                 {
@@ -535,14 +529,10 @@ void App::showMemuBar()
                                     << " " << gtl::xh(rect) << " " << gtl::yh(rect) << " ;\n";
                     }
                     output_file.close();
-
-                    puts("Success!");
-                    puts(savePath);
-                    free(savePath);
                 }
                 else if ( result == NFD_CANCEL )
                 {
-                    puts("User pressed cancel.");
+                    // puts("User pressed cancel.");
                 }
                 else 
                 {
