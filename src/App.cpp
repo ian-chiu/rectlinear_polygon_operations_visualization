@@ -748,9 +748,8 @@ void App::showInputWindow()
                 
             strcpy(s, "");
         }
-
         
-        if ( sf::Mouse::isButtonPressed(sf::Mouse::Left))
+        if (ImGui::GetMouseCursor() != ImGuiMouseCursor_TextInput && sf::Mouse::isButtonPressed(sf::Mouse::Left))
         {
             can_show_inputWindow = false;
         }

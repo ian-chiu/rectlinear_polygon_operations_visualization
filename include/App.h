@@ -1,5 +1,5 @@
 #pragma once
-//TODO: fix resized focus and add input focus coorodinate
+//TODO: add input focus coorodinate
 
 
 #include <vector>
