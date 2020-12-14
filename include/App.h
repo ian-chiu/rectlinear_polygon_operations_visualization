@@ -69,6 +69,8 @@ private:
     std::vector<sf::Vertex> lines;
     bool contains(Rect rect, sf::Vector2f pos);
     void draw_polygon_set(const PolygonSet_NoHoles &ps);
+    std::vector<std::vector<Rect>> poly_shapes;
+    bool is_ps_updated = true;
 
     bool can_show_hintBar = true;
     bool can_show_inputWindow = false;

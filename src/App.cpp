@@ -46,6 +46,7 @@ App::App(int w, int h)
 void App::execute_and_render_operations()
 {
     isImportFile = false;
+    is_ps_updated = true;
     const int psh_array_size = 50;
     std::array<PolygonSetHelper, psh_array_size> psh_array{};
     bool pshArrHasTask = false;
@@ -146,6 +147,13 @@ void App::execute_and_render_operations()
                             }
 
                             polygon_set.push_back(polygon);
+
+                            if (window.isOpen()) 
+                            {
+                                render();
+                                is_ps_updated = false;
+                            }
+
                             while(!can_start_step && window.isOpen() && !isImportFile) 
                             {
                                 render();
@@ -179,6 +187,7 @@ void App::execute_and_render_operations()
                             step_cnt = 0;
                             isPause = false;
                             pshArrHasTask = false;
+                            is_ps_updated = true;
                         }
 
                         render(false);
@@ -205,6 +214,12 @@ void App::execute_and_render_operations()
         hint_text = "All operations are done. You can export the output result now.";
         isAllDone = true;
         split_mode = true;
+
+        if (window.isOpen()) 
+        {
+            render();
+            is_ps_updated = false;
+        }
     }
 }
 
@@ -450,18 +465,26 @@ void App::draw_rects_edge(const std::vector<Rect> &rects)
 
 void App::draw_polygon_set(const PolygonSet_NoHoles &ps)
 {
+    if (is_ps_updated)
+    {
+        poly_shapes.clear();
+        for (const auto &poly : ps)
+        {
+            gtl::get_rectangles(rect_shapes, poly);
+            poly_shapes.emplace_back(rect_shapes);
+            rect_shapes.clear();
+        }
+    }
+
     sf::Color shape_color;
     int polygon_cnt = 0;
-    for (const auto &poly : ps)
+    for (const auto &poly_shape : poly_shapes)
     {
         shape_color = boardColor;
-        if (!isAllDone && polygon_cnt == ps.size() - 1 )
+        if (!isAllDone && polygon_cnt == poly_shapes.size() - 1 )
             shape_color = operColor;
         
-        gtl::get_rectangles(rect_shapes, poly);
-        draw_rectangles(rect_shapes, shape_color);
-        rect_shapes.clear();
-
+        draw_rectangles(poly_shape, shape_color);
         polygon_cnt++;
     }
 }
