@@ -139,10 +139,10 @@ void App::execute_and_render_operations()
                         {
                             Point boundary_center;
                             gtl::center(boundary_center, polygon);
-                            focusPoint = plotPos(boundary_center.x(), boundary_center.y());
+                            focusPoint = sf::Vector2f((float)boundary_center.x(), (float)boundary_center.y());
                             if (focusMode)
                             {
-                                camera.setCenter(focusPoint);
+                                camera.setCenter(plotPos(focusPoint));
                                 window.setView(camera);
                             }
 
@@ -243,7 +243,7 @@ void App::render(bool can_draw_shapes)
             win_height = event.size.height;
             win_width = event.size.width;
             camera.setSize(win_width * worldScale, win_height * worldScale);
-            camera.setCenter(focusPoint);
+            camera.setCenter(plotPos(focusPoint));
             window.setView(camera);
         }
         else if (event.type == sf::Event::MouseWheelMoved)
@@ -282,7 +282,7 @@ void App::render(bool can_draw_shapes)
                 break;
 
             case sf::Keyboard::F:
-                camera.setCenter(focusPoint);
+                camera.setCenter(plotPos(focusPoint));
                 window.setView(camera);
                 break;
 
