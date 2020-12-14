@@ -1,5 +1,6 @@
-#include <SFML/Graphics.hpp>
+#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 
+#include <SFML/Graphics.hpp>
 #include "App.h"
 #include "cmake_variables.h"
 #include "gtl_poly_types.h"

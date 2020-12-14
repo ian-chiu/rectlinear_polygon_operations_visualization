@@ -57,6 +57,8 @@ private:
     sf::Vector2f focusPoint;
     bool focusMode = true;
     float camera_speed = 0.8f;
+    float button_zoom_factor = 1.05f;
+    float mouse_zoom_factor = 1.2f;
     float worldScale = 1.0f;
 
     int step_cnt{};

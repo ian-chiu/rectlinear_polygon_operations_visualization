@@ -194,6 +194,16 @@ void App::execute_and_render_operations()
                     }
                 }
 
+                for (auto &psh : psh_array) 
+                {
+                    psh.wait_futures();
+                    curr_oper[0] == 'M' ? polygon_set += psh.ps : polygon_set -= psh.ps;
+                    psh.ps.clear();
+                }
+                step_cnt = 0;
+                pshArrHasTask = false;
+                is_ps_updated = true;
+
                 render();
                 step_cnt = 0;
                 break;
@@ -250,13 +260,13 @@ void App::render(bool can_draw_shapes)
         {
             if (event.mouseWheel.delta > 0)
             {
-                worldScale /= 1.05f;
-                camera.zoom(1.0f / 1.05f);
+                worldScale /= mouse_zoom_factor;
+                camera.zoom(1.0f / mouse_zoom_factor);
             }
             else
             {
-                worldScale *= 1.05f;
-                camera.zoom(1.05f);
+                worldScale *= mouse_zoom_factor;
+                camera.zoom(mouse_zoom_factor);
             }
             window.setView(camera);
         }
@@ -335,14 +345,14 @@ void App::render(bool can_draw_shapes)
         }
         if (worldScale >= 0.01f && sf::Keyboard::isKeyPressed(sf::Keyboard::Add))
         {
-            worldScale /= 1.05f;
-            camera.zoom(1.0f / 1.05f);
+            worldScale /= button_zoom_factor;
+            camera.zoom(1.0f / button_zoom_factor);
             window.setView(camera);
         }
         if (worldScale <= 10000000.0f &&sf::Keyboard::isKeyPressed(sf::Keyboard::Subtract))
         {
-            worldScale *= 1.05f;
-            camera.zoom(1.05f);
+            worldScale *= button_zoom_factor;
+            camera.zoom(button_zoom_factor);
             window.setView(camera);
         }
     }
